@@ -1,0 +1,1566 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clark — Il tuo agente finanziario</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+  if(typeof pdfjsLib !== 'undefined') {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  }
+</script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  --bg:#0a0a0c; --surface:#111113; --surface2:#18181b; --surface3:#222226;
+  --border:#2a2a2e; --border2:#333338;
+  --accent:#00e5a0; --accent2:#00b87a;
+  --red:#ff4d4d; --yellow:#ffc840; --blue:#4da6ff; --purple:#b97cff; --orange:#ff8c42;
+  --text:#f0f0f4; --text2:#a0a0aa; --text3:#6b6b72;
+  --font:'Space Grotesk',sans-serif; --mono:'JetBrains Mono',monospace;
+  --radius:12px; --shadow:0 4px 24px rgba(0,0,0,.4);
+}
+.light {
+  --bg:#f5f5f7; --surface:#ffffff; --surface2:#f0f0f5; --surface3:#e8e8f0;
+  --border:#e0e0e8; --border2:#d0d0dc;
+  --text:#111118; --text2:#555560; --text3:#909098;
+}
+
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;display:flex;flex-direction:column;transition:background .3s,color .3s;}
+
+/* ONBOARDING */
+#onboarding{position:fixed;inset:0;background:var(--bg);z-index:1000;display:flex;align-items:center;justify-content:center;padding:24px;}
+.ob-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:48px 40px;max-width:460px;width:100%;text-align:center;}
+.ob-logo{font-size:40px;margin-bottom:16px;}
+.ob-title{font-size:28px;font-weight:700;margin-bottom:8px;letter-spacing:-.02em;}
+.ob-title span{color:var(--accent);}
+.ob-sub{font-size:14px;color:var(--text2);margin-bottom:32px;line-height:1.6;}
+.ob-step{display:none;} .ob-step.active{display:block;}
+.ob-field{text-align:left;margin-bottom:16px;}
+.ob-field label{font-size:12px;color:var(--text2);display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em;}
+.ob-input{width:100%;padding:12px 16px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-family:var(--font);font-size:15px;outline:none;transition:border-color .2s;}
+.ob-input:focus{border-color:var(--accent);}
+.ob-btn{width:100%;padding:14px;border-radius:10px;border:none;background:var(--accent);color:#000;font-family:var(--font);font-size:15px;font-weight:700;cursor:pointer;margin-top:8px;transition:opacity .2s;}
+.ob-btn:hover{opacity:.88;}
+.ob-goals{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px;}
+.ob-goal{padding:14px 10px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);cursor:pointer;transition:all .2s;text-align:center;}
+.ob-goal:hover,.ob-goal.sel{border-color:var(--accent);background:rgba(0,229,160,.08);}
+.ob-goal .og-icon{font-size:24px;margin-bottom:6px;}
+.ob-goal .og-label{font-size:12px;font-weight:500;}
+.ob-dots{display:flex;gap:6px;justify-content:center;margin-bottom:28px;}
+.ob-dot{width:6px;height:6px;border-radius:50%;background:var(--border);}
+.ob-dot.active{background:var(--accent);width:20px;border-radius:3px;}
+
+/* NAV */
+nav{display:flex;align-items:center;gap:12px;padding:0 24px;height:58px;border-bottom:1px solid var(--border);background:var(--surface);position:sticky;top:0;z-index:200;backdrop-filter:blur(12px);}
+.nav-logo{font-size:17px;font-weight:700;color:var(--accent);letter-spacing:-.02em;display:flex;align-items:center;gap:6px;}
+.nav-score{display:flex;align-items:center;gap:6px;padding:4px 12px;border-radius:20px;border:1px solid var(--border);background:var(--surface2);cursor:pointer;}
+.ns-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;}
+.ns-val{font-size:14px;font-weight:700;font-family:var(--mono);}
+.nav-alert{width:28px;height:28px;border-radius:8px;background:rgba(255,200,64,.15);border:1px solid rgba(255,200,64,.3);display:none;align-items:center;justify-content:center;cursor:pointer;font-size:14px;position:relative;}
+.nav-alert.show{display:flex;}
+.alert-dot{position:absolute;top:-3px;right:-3px;width:8px;height:8px;border-radius:50%;background:var(--red);}
+.nav-time{font-size:11px;color:var(--text3);margin-left:2px;}
+.nav-right{margin-left:auto;display:flex;align-items:center;gap:6px;}
+.nav-btn{padding:6px 12px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text2);font-family:var(--font);font-size:11px;font-weight:600;cursor:pointer;transition:all .2s;}
+.nav-btn:hover{border-color:var(--accent);color:var(--accent);}
+.nav-btn.primary{background:rgba(0,229,160,.12);border-color:var(--accent);color:var(--accent);}
+.theme-btn{width:30px;height:30px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all .2s;}
+.theme-btn:hover{border-color:var(--accent);}
+
+/* ALERTS PANEL */
+.alerts-panel{display:none;position:absolute;top:58px;right:24px;width:320px;background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow);z-index:300;padding:16px;}
+.alerts-panel.open{display:block;}
+.ap-title{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:12px;}
+.alert-item{display:flex;gap:10px;padding:10px;border-radius:8px;border:1px solid var(--border);margin-bottom:8px;background:var(--surface2);}
+.ai-icon{font-size:18px;flex-shrink:0;}
+.ai-text{font-size:12px;line-height:1.5;color:var(--text2);}
+.ai-text strong{color:var(--text);}
+
+/* LAYOUT */
+#app{display:grid;grid-template-columns:300px 1fr;flex:1;}
+.sidebar{background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;height:calc(100vh - 58px);position:sticky;top:58px;}
+.main{display:flex;flex-direction:column;overflow-y:auto;height:calc(100vh - 58px);}
+
+/* SIDEBAR */
+.sb{padding:16px 14px;border-bottom:1px solid var(--border);}
+.sb-title{font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--text3);margin-bottom:12px;font-weight:600;}
+.toggle{display:flex;gap:5px;margin-bottom:10px;}
+.tbtn{flex:1;padding:8px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text3);font-family:var(--font);font-size:12px;cursor:pointer;transition:all .2s;font-weight:500;}
+.tbtn.in{border-color:var(--accent);color:var(--accent);background:rgba(0,229,160,.08);}
+.tbtn.out{border-color:var(--red);color:var(--red);background:rgba(255,77,77,.08);}
+.field{display:flex;flex-direction:column;gap:4px;margin-bottom:8px;}
+.field label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;}
+input,select,textarea{background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--font);font-size:13px;padding:8px 11px;width:100%;outline:none;transition:border-color .2s;}
+input:focus,select:focus,textarea:focus{border-color:var(--accent);}
+select option{background:var(--surface2);}
+.add-btn{width:100%;padding:10px;border-radius:10px;border:none;font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;background:var(--accent);color:#000;transition:all .2s;margin-top:4px;display:flex;align-items:center;justify-content:center;gap:6px;}
+.add-btn:hover{opacity:.88;}
+.shortcuts{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
+.sc{padding:3px 8px;border-radius:5px;background:var(--surface3);border:1px solid var(--border);font-size:10px;color:var(--text3);}
+.sc kbd{font-family:var(--mono);color:var(--accent);}
+.fav-item{display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);cursor:pointer;transition:all .2s;margin-bottom:5px;}
+.fav-item:hover{border-color:var(--accent);}
+.fav-emoji{font-size:15px;}
+.fav-info{flex:1;min-width:0;}
+.fav-name{font-size:11px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.fav-amt{font-size:10px;color:var(--text3);font-family:var(--mono);}
+.fav-plus{font-size:16px;color:var(--text3);}
+
+/* BUDGET */
+.budget-item{margin-bottom:10px;}
+.budget-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;}
+.budget-cat{font-size:11px;font-weight:500;}
+.budget-vals{font-size:10px;color:var(--text3);font-family:var(--mono);}
+.budget-track{height:5px;background:var(--surface3);border-radius:3px;overflow:hidden;}
+.budget-fill{height:100%;border-radius:3px;transition:width .6s ease;}
+
+/* STATS */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:16px 20px;border-bottom:1px solid var(--border);}
+.scard{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;position:relative;overflow:hidden;cursor:default;}
+.scard::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:2px 2px 0 0;}
+.scard.g::after{background:var(--accent);}
+.scard.r::after{background:var(--red);}
+.scard.b::after{background:var(--blue);}
+.scard.p::after{background:var(--purple);}
+.sc-label{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--text3);margin-bottom:6px;}
+.sc-val{font-size:20px;font-weight:700;font-family:var(--mono);transition:all .3s;}
+.scard.g .sc-val{color:var(--accent);}
+.scard.r .sc-val{color:var(--red);}
+.scard.b .sc-val{color:var(--blue);}
+.scard.p .sc-val{color:var(--purple);}
+.sc-sub{font-size:10px;color:var(--text3);margin-top:3px;}
+.sc-delta{font-size:10px;font-weight:600;padding:1px 6px;border-radius:10px;display:inline-block;margin-top:3px;}
+.sc-delta.up{background:rgba(0,229,160,.15);color:var(--accent);}
+.sc-delta.down{background:rgba(255,77,77,.15);color:var(--red);}
+
+/* HEALTH BAR */
+.health-bar{margin:0 20px 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;}
+.hb-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.hb-title{font-size:11px;font-weight:600;color:var(--text2);}
+.hb-score{font-size:20px;font-weight:700;font-family:var(--mono);}
+.hb-track{height:8px;background:var(--surface3);border-radius:4px;overflow:hidden;position:relative;}
+.hb-fill{height:100%;border-radius:4px;transition:width 1s ease;}
+.hb-labels{display:flex;justify-content:space-between;margin-top:5px;}
+.hb-label{font-size:9px;color:var(--text3);}
+.hb-desc{font-size:11px;color:var(--text2);margin-top:8px;}
+
+/* CHARTS */
+.charts-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:0 20px 14px;}
+.chart-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;}
+.chart-title{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:12px;font-weight:600;}
+.donut-wrap{display:flex;gap:12px;align-items:center;}
+canvas{flex-shrink:0;}
+.legend{display:flex;flex-direction:column;gap:6px;flex:1;min-width:0;}
+.leg{display:flex;align-items:center;gap:6px;font-size:10px;}
+.leg-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.leg-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text2);}
+.leg-val{font-family:var(--mono);font-size:10px;}
+.bar-chart{display:flex;flex-direction:column;gap:8px;}
+.bar-row{display:flex;align-items:center;gap:8px;}
+.bar-label{font-size:10px;color:var(--text2);width:70px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.bar-track{flex:1;height:5px;background:var(--surface3);border-radius:3px;overflow:hidden;}
+.bar-fill{height:100%;border-radius:3px;transition:width .8s ease;}
+.bar-val{font-size:10px;font-family:var(--mono);width:60px;text-align:right;flex-shrink:0;}
+
+/* TREND CHART */
+.trend-chart{position:relative;height:80px;}
+.trend-chart canvas{width:100%!important;height:80px!important;}
+
+/* FILTERS */
+.action-bar{display:flex;align-items:center;gap:8px;padding:10px 20px;border-top:1px solid var(--border);border-bottom:1px solid var(--border);flex-wrap:wrap;background:var(--surface);}
+.abar-btn{padding:6px 12px;border-radius:8px;font-family:var(--font);font-size:11px;font-weight:600;cursor:pointer;transition:all .2s;border:1px solid var(--border);}
+.abar-sync{background:rgba(0,229,160,.12);border-color:var(--accent);color:var(--accent);}
+.abar-import{background:rgba(0,229,160,.06);border-color:rgba(0,229,160,.3);color:var(--accent);}
+.abar-export{background:var(--surface2);color:var(--text2);}
+.abar-export:hover{color:var(--text);}
+.period-btns{display:flex;gap:4px;margin-left:auto;}
+.pbtn{padding:4px 10px;border-radius:16px;border:1px solid var(--border);background:transparent;color:var(--text3);font-family:var(--font);font-size:11px;cursor:pointer;transition:all .2s;}
+.pbtn.active{border-color:var(--accent);color:var(--accent);background:rgba(0,229,160,.08);}
+.filters-row{display:flex;align-items:center;gap:6px;padding:10px 20px;border-bottom:1px solid var(--border);flex-wrap:wrap;}
+.fbtn{padding:4px 10px;border-radius:16px;border:1px solid var(--border);background:transparent;color:var(--text3);font-family:var(--font);font-size:11px;cursor:pointer;transition:all .2s;}
+.fbtn.active{border-color:var(--accent);color:var(--accent);background:rgba(0,229,160,.08);}
+.search-wrap{margin-left:auto;position:relative;}
+.search-ico{position:absolute;left:9px;top:50%;transform:translateY(-50%);font-size:12px;pointer-events:none;}
+.search-input{padding:5px 10px 5px 26px;border-radius:16px;font-size:11px;width:160px;}
+#ob-status{display:none;font-size:12px;padding:8px 14px;margin:8px 20px 0;border-radius:8px;}
+
+/* TX LIST */
+.tx-section{padding:0 20px 100px;flex:1;}
+.tx-group-label{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--text3);padding:12px 0 6px;font-weight:600;}
+.tx-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;border:1px solid transparent;margin-bottom:4px;cursor:default;transition:all .2s;background:var(--surface);}
+.tx-item:hover{border-color:var(--border2);background:var(--surface2);}
+.tx-icon{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+.tx-body{flex:1;min-width:0;}
+.tx-desc{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.tx-meta{font-size:10px;color:var(--text3);margin-top:2px;display:flex;align-items:center;gap:5px;}
+.tx-tag{padding:1px 7px;border-radius:8px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;}
+.tx-right{display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0;}
+.tx-amt{font-family:var(--mono);font-size:13px;font-weight:600;}
+.tx-amt.in{color:var(--accent);} .tx-amt.out{color:var(--red);}
+.tx-del{font-size:11px;color:var(--text3);background:none;border:none;cursor:pointer;opacity:0;transition:opacity .15s;padding:1px 4px;}
+.tx-item:hover .tx-del{opacity:1;}
+.tx-del:hover{color:var(--red);}
+.empty-tx{text-align:center;padding:60px 20px;color:var(--text3);}
+.empty-tx .ei{font-size:40px;margin-bottom:12px;}
+.empty-tx .et{font-size:15px;font-weight:600;color:var(--text2);margin-bottom:6px;}
+.empty-tx .es{font-size:13px;}
+
+/* MODAL */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:500;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px);}
+.overlay.open{display:flex;}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:18px;width:100%;max-width:640px;max-height:88vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:var(--shadow);}
+.modal-hdr{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border);}
+.modal-body{padding:18px 20px;overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:12px;}
+.close-btn{width:26px;height:26px;border-radius:7px;border:none;background:var(--surface2);color:var(--text2);font-size:15px;cursor:pointer;}
+.presets{display:flex;gap:5px;flex-wrap:wrap;}
+.preset{padding:4px 11px;border-radius:16px;border:1px solid var(--border);background:var(--surface2);color:var(--text2);font-family:var(--font);font-size:11px;cursor:pointer;transition:all .2s;}
+.preset.active,.preset:hover{border-color:var(--accent);color:var(--accent);}
+.pill{display:inline-block;padding:1px 7px;border-radius:8px;font-size:9px;font-weight:700;text-transform:uppercase;}
+.pill-in{background:rgba(0,229,160,.15);color:var(--accent);}
+.pill-out{background:rgba(255,77,77,.15);color:var(--red);}
+.preview-scroll{overflow-x:auto;border:1px solid var(--border);border-radius:8px;}
+table{width:100%;border-collapse:collapse;font-size:11px;}
+th{text-align:left;padding:6px 10px;color:var(--text3);font-size:9px;text-transform:uppercase;border-bottom:1px solid var(--border);}
+td{padding:7px 10px;border-bottom:1px solid var(--border);}
+tr:last-child td{border-bottom:none;}
+.row-btns{display:flex;gap:8px;margin-top:10px;}
+.sbtn{flex:1;padding:9px;border-radius:8px;border:none;font-family:var(--font);font-size:13px;font-weight:600;cursor:pointer;}
+.sbtn-g{background:var(--accent);color:#000;}
+.sbtn-ghost{background:var(--surface2);color:var(--text2);border:1px solid var(--border);}
+.prog{font-size:11px;color:var(--text3);text-align:center;min-height:16px;margin-top:6px;}
+
+/* CHAT */
+.chat-drawer{position:fixed;bottom:0;right:20px;width:340px;height:480px;background:var(--surface);border:1px solid var(--border);border-radius:16px 16px 0 0;display:flex;flex-direction:column;z-index:400;transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);box-shadow:0 -8px 40px rgba(0,0,0,.5);}
+.chat-drawer.open{transform:translateY(0);}
+.cdh{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--border);}
+.cdh-info{display:flex;align-items:center;gap:9px;}
+.cdh-av{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,rgba(0,229,160,.3),rgba(0,229,160,.1));display:flex;align-items:center;justify-content:center;font-size:16px;}
+.cdh-name{font-size:13px;font-weight:700;}
+.cdh-status{font-size:9px;color:var(--accent);display:flex;align-items:center;gap:3px;}
+.status-dot{width:5px;height:5px;border-radius:50%;background:var(--accent);}
+.cd-close{background:none;border:none;color:var(--text3);font-size:17px;cursor:pointer;}
+.chat-msgs{flex:1;overflow-y:auto;padding:10px;display:flex;flex-direction:column;gap:8px;}
+.cmsg{display:flex;gap:7px;max-width:92%;}
+.cmsg.user{flex-direction:row-reverse;align-self:flex-end;}
+.cbubble{padding:8px 12px;border-radius:12px;font-size:12px;line-height:1.6;white-space:pre-wrap;}
+.cmsg.user .cbubble{background:var(--surface3);border:1px solid var(--border2);border-radius:12px 3px 12px 12px;}
+.cmsg.ai .cbubble{background:rgba(0,229,160,.06);border:1px solid rgba(0,229,160,.15);border-radius:3px 12px 12px 12px;}
+.cav{width:22px;height:22px;border-radius:6px;background:rgba(0,229,160,.15);display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;margin-top:2px;}
+.cq-row{display:flex;gap:4px;flex-wrap:wrap;padding:5px 10px 7px;}
+.cq{padding:3px 8px;border-radius:12px;border:1px solid var(--border);background:var(--surface2);color:var(--text3);font-family:var(--font);font-size:10px;cursor:pointer;transition:all .2s;}
+.cq:hover{border-color:var(--accent);color:var(--accent);}
+.cin-row{padding:8px 10px;border-top:1px solid var(--border);display:flex;gap:7px;align-items:flex-end;}
+.cin-row textarea{flex:1;resize:none;min-height:34px;max-height:80px;font-size:12px;line-height:1.5;padding:6px 10px;border-radius:8px;}
+.csend{width:34px;height:34px;border-radius:8px;border:none;background:var(--accent);color:#000;font-size:14px;cursor:pointer;flex-shrink:0;transition:opacity .2s;}
+.csend:hover{opacity:.85;} .csend:disabled{opacity:.4;cursor:not-allowed;}
+.td{display:flex;gap:3px;align-items:center;padding:1px 0;}
+.td span{width:4px;height:4px;background:var(--accent);border-radius:50%;animation:tda 1.2s infinite;}
+.td span:nth-child(2){animation-delay:.2s;} .td span:nth-child(3){animation-delay:.4s;}
+@keyframes tda{0%,80%,100%{transform:translateY(0);}40%{transform:translateY(-4px);}}
+
+/* SCORE MODAL */
+.score-modal{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:600;display:none;align-items:center;justify-content:center;padding:20px;}
+.score-modal.open{display:flex;}
+.sm-card{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:32px;max-width:400px;width:100%;text-align:center;}
+.sm-score{font-size:64px;font-weight:700;font-family:var(--mono);margin:12px 0 4px;}
+.sm-label{font-size:13px;color:var(--text2);margin-bottom:20px;}
+.sm-items{text-align:left;display:flex;flex-direction:column;gap:8px;margin-bottom:24px;}
+.sm-item{display:flex;align-items:center;gap:8px;font-size:12px;}
+.sm-icon{width:24px;text-align:center;}
+.sm-close{width:100%;padding:12px;border-radius:10px;border:none;background:var(--accent);color:#000;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;}
+
+::-webkit-scrollbar{width:3px;height:3px;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+
+/* GMAIL SETUP MODAL */
+.gmail-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:600;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(6px);}
+.gmail-overlay.open{display:flex;}
+.gmail-modal{background:var(--surface);border:1px solid var(--border);border-radius:20px;width:100%;max-width:560px;max-height:92vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.5);}
+.gm-header{padding:28px 28px 0;text-align:center;}
+.gm-icon{font-size:40px;margin-bottom:12px;}
+.gm-title{font-size:22px;font-weight:700;margin-bottom:6px;}
+.gm-sub{font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:24px;}
+.gm-progress{display:flex;align-items:center;gap:0;padding:0 28px;margin-bottom:0;}
+.gm-step-dot{width:28px;height:28px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--text3);flex-shrink:0;transition:all .3s;background:var(--surface2);}
+.gm-step-dot.done{background:var(--accent);border-color:var(--accent);color:#000;}
+.gm-step-dot.active{border-color:var(--accent);color:var(--accent);}
+.gm-step-line{flex:1;height:2px;background:var(--border);transition:background .3s;}
+.gm-step-line.done{background:var(--accent);}
+.gm-body{padding:24px 28px;}
+.gm-step-content{display:none;} .gm-step-content.active{display:block;}
+.gm-step-title{font-size:16px;font-weight:700;margin-bottom:6px;}
+.gm-step-desc{font-size:13px;color:var(--text2);line-height:1.7;margin-bottom:20px;}
+.gm-card{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px;}
+.gm-card-title{font-size:12px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+.gm-instruction{display:flex;align-items:flex-start;gap:12px;margin-bottom:10px;}
+.gm-num{width:22px;height:22px;border-radius:50%;background:var(--accent);color:#000;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.gm-text{font-size:13px;color:var(--text2);line-height:1.5;}
+.gm-text strong{color:var(--text);}
+.gm-tip{background:rgba(0,229,160,.06);border:1px solid rgba(0,229,160,.2);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:16px;}
+.gm-tip strong{color:var(--accent);}
+.gm-screenshot{background:var(--surface3);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:14px;font-size:12px;color:var(--text3);text-align:center;}
+.gm-screen-mock{background:var(--bg);border:1px solid var(--border2);border-radius:8px;padding:12px;margin-top:8px;text-align:left;}
+.gm-mock-row{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:11px;}
+.gm-mock-row:last-child{border-bottom:none;}
+.gm-mock-label{color:var(--text2);}
+.gm-mock-toggle{width:32px;height:18px;border-radius:9px;background:var(--accent);position:relative;cursor:pointer;}
+.gm-mock-toggle::after{content:'';position:absolute;width:14px;height:14px;border-radius:50%;background:#000;top:2px;right:2px;transition:all .2s;}
+.gm-mock-toggle.off{background:var(--surface3);}
+.gm-mock-toggle.off::after{right:auto;left:2px;background:var(--text3);}
+.gm-actions{display:flex;gap:8px;margin-top:20px;}
+.gm-btn{flex:1;padding:12px;border-radius:10px;border:none;font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;transition:opacity .2s;}
+.gm-btn-primary{background:var(--accent);color:#000;}
+.gm-btn-primary:hover{opacity:.88;}
+.gm-btn-ghost{background:var(--surface2);color:var(--text2);border:1px solid var(--border);}
+.gm-btn-ghost:hover{color:var(--text);}
+.gm-input{width:100%;padding:11px 14px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-family:var(--font);font-size:14px;outline:none;transition:border-color .2s;margin-bottom:10px;}
+.gm-input:focus{border-color:var(--accent);}
+.gm-connected{text-align:center;padding:20px 0;}
+.gm-connected-icon{font-size:48px;margin-bottom:12px;}
+.gm-connected-title{font-size:18px;font-weight:700;color:var(--accent);margin-bottom:6px;}
+.gm-connected-sub{font-size:13px;color:var(--text2);line-height:1.6;}
+.gm-sync-btn{width:100%;padding:13px;border-radius:10px;border:none;background:var(--accent);color:#000;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;margin-top:16px;transition:opacity .2s;}
+.gm-sync-btn:hover{opacity:.88;}
+.gm-status{font-size:12px;color:var(--text3);text-align:center;margin-top:8px;min-height:16px;}
+
+@media(max-width:900px){
+  #app{grid-template-columns:1fr;}
+  .sidebar{height:auto;position:static;border-right:none;border-bottom:1px solid var(--border);}
+  .main{height:auto;}
+  .stats-row{grid-template-columns:1fr 1fr;}
+  .charts-row{grid-template-columns:1fr;}
+  .chat-drawer{width:100%;right:0;}
+  .overlay{padding:0;align-items:flex-end;}
+  .modal{border-radius:18px 18px 0 0;max-height:92vh;}
+}
+@media(max-width:500px){
+  .stats-row{grid-template-columns:1fr 1fr;}
+  nav{padding:0 14px;}
+}
+</style>
+</head>
+<body>
+
+<!-- ONBOARDING -->
+<div id="onboarding">
+  <div class="ob-card">
+    <div class="ob-logo">💚</div>
+    <div class="ob-title">Benvenuto in <span>Clark</span></div>
+    <div class="ob-sub">Il tuo agente finanziario personale. Intelligente, preciso e sempre dalla tua parte.</div>
+    <div class="ob-dots"><div class="ob-dot active" id="d1"></div><div class="ob-dot" id="d2"></div><div class="ob-dot" id="d3"></div></div>
+
+    <div class="ob-step active" id="ob1">
+      <div class="ob-field"><label>Come ti chiamo?</label><input class="ob-input" id="ob-name" placeholder="Il tuo nome..." autofocus></div>
+      <button class="ob-btn" onclick="obNext(1)">Continua →</button>
+    </div>
+
+    <div class="ob-step" id="ob2">
+      <div class="ob-field"><label>Qual è il tuo obiettivo principale?</label></div>
+      <div class="ob-goals">
+        <div class="ob-goal" onclick="selGoal(this,'risparmio')"><div class="og-icon">🐖</div><div class="og-label">Risparmiare di più</div></div>
+        <div class="ob-goal" onclick="selGoal(this,'controllo')"><div class="og-icon">📊</div><div class="og-label">Tenere il controllo</div></div>
+        <div class="ob-goal" onclick="selGoal(this,'business')"><div class="og-icon">🚀</div><div class="og-label">Gestire il business</div></div>
+        <div class="ob-goal" onclick="selGoal(this,'investire')"><div class="og-icon">📈</div><div class="og-label">Pianificare il futuro</div></div>
+      </div>
+      <button class="ob-btn" onclick="obNext(2)">Continua →</button>
+    </div>
+
+    <div class="ob-step" id="ob3">
+      <div class="ob-field"><label>Budget mensile uscite (€)</label><input class="ob-input" id="ob-budget" placeholder="es. 1500" type="number"></div>
+      <div style="font-size:12px;color:var(--text2);text-align:left;margin-bottom:16px;line-height:1.6">Clark userà questo dato per avvisarti quando stai per sforare il budget in una categoria.</div>
+      <button class="ob-btn" onclick="obFinish()">Inizia con Clark ✓</button>
+    </div>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">💚 Clark</div>
+  <div class="nav-score" onclick="openScore()">
+    <span class="ns-label">Score</span>
+    <span class="ns-val" id="nav-score">—</span>
+  </div>
+  <div class="nav-alert" id="nav-alert" onclick="toggleAlerts()">
+    🔔<div class="alert-dot"></div>
+  </div>
+  <span class="nav-time" id="nav-time"></span>
+  <div class="nav-right">
+    <button class="nav-btn" onclick="openModal()">⬆ Importa</button>
+    <button class="nav-btn" onclick="exportCsv()">⬇ Esporta</button>
+    <button class="nav-btn" id="gmail-btn" onclick="openGmailSetup()">📧 Collega Banca</button>
+    <button class="nav-btn primary" onclick="toggleChat()">💬 Clark AI</button>
+    <div class="theme-btn" onclick="toggleTheme()" id="theme-btn">🌙</div>
+  </div>
+</nav>
+
+<!-- ALERTS -->
+<div class="alerts-panel" id="alerts-panel">
+  <div class="ap-title">🔔 Avvisi di Clark</div>
+  <div id="alerts-list"></div>
+</div>
+
+<div id="app">
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sb">
+      <div class="sb-title">Nuova transazione</div>
+      <div class="toggle">
+        <button class="tbtn in" id="btn-in" onclick="setType('entrata')">＋ Entrata</button>
+        <button class="tbtn" id="btn-out" onclick="setType('uscita')">－ Uscita</button>
+      </div>
+      <div class="field"><label>Descrizione</label><input id="f-desc" placeholder="es. Vendita ordine #42..." onkeydown="if(event.key==='Enter')addTx()"></div>
+      <div class="field"><label>Importo €</label><input id="f-amt" type="number" placeholder="0.00" min="0" step="0.01" onkeydown="if(event.key==='Enter')addTx()"></div>
+      <div class="field">
+        <label>Categoria</label>
+        <select id="f-cat">
+          <option value="">Seleziona...</option>
+          <optgroup label="📈 Entrate"><option value="Vendite prodotti">🛍️ Vendite prodotti</option><option value="Servizi">💼 Servizi</option><option value="Affiliazioni">🔗 Affiliazioni</option><option value="Rimborsi ricevuti">↩️ Rimborsi</option></optgroup>
+          <optgroup label="📉 Uscite"><option value="Fornitori">📦 Fornitori</option><option value="Marketing & Ads">📣 Marketing & Ads</option><option value="Software & Tools">💻 Software & Tools</option><option value="Logistica & Spedizioni">🚚 Logistica</option><option value="Tasse & Imposte">🏛️ Tasse & Imposte</option><option value="Personale">👥 Personale</option><option value="Alimentari">🛒 Alimentari</option><option value="Ristoranti">🍽️ Ristoranti</option><option value="Trasporti">🚗 Trasporti</option><option value="Altro">📂 Altro</option></optgroup>
+        </select>
+      </div>
+      <div class="field"><label>Data</label><input id="f-date" type="date"></div>
+      <button class="add-btn" id="add-btn" onclick="addTx()"><span>＋</span><span id="add-btn-text">Registra</span></button>
+      <div class="shortcuts">
+        <span class="sc"><kbd>E</kbd> Entrata</span>
+        <span class="sc"><kbd>U</kbd> Uscita</span>
+        <span class="sc"><kbd>/</kbd> Cerca</span>
+      </div>
+    </div>
+
+    <div class="sb">
+      <div class="sb-title">⚡ Spese rapide</div>
+      <div id="favs"></div>
+    </div>
+
+    <div class="sb">
+      <div class="sb-title">🎯 Budget mensile</div>
+      <div id="budget-list"></div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="stats-row">
+      <div class="scard g"><div class="sc-label">Entrate</div><div class="sc-val" id="s-in">€0</div><div class="sc-sub" id="s-in-sub"></div><div class="sc-delta" id="s-in-delta" style="display:none"></div></div>
+      <div class="scard r"><div class="sc-label">Uscite</div><div class="sc-val" id="s-out">€0</div><div class="sc-sub" id="s-out-sub"></div><div class="sc-delta" id="s-out-delta" style="display:none"></div></div>
+      <div class="scard b"><div class="sc-label">Saldo netto</div><div class="sc-val" id="s-net">€0</div><div class="sc-sub" id="s-net-sub">questo periodo</div></div>
+      <div class="scard p"><div class="sc-label">Transazioni</div><div class="sc-val" id="s-count">0</div><div class="sc-sub" id="s-avg"></div></div>
+    </div>
+
+    <div style="padding:0 20px 10px">
+      <div class="health-bar">
+        <div class="hb-top">
+          <span class="hb-title">💚 Salute Finanziaria</span>
+          <span class="hb-score" id="hb-score">—</span>
+        </div>
+        <div class="hb-track"><div class="hb-fill" id="hb-fill" style="width:0%"></div></div>
+        <div class="hb-labels"><span class="hb-label">Critica</span><span class="hb-label">Scarsa</span><span class="hb-label">Buona</span><span class="hb-label">Ottima</span></div>
+        <div class="hb-desc" id="hb-desc">Aggiungi alcune transazioni per calcolare il tuo score.</div>
+      </div>
+    </div>
+
+    <div class="charts-row">
+      <div class="chart-card">
+        <div class="chart-title">Uscite per categoria</div>
+        <div class="donut-wrap">
+          <canvas id="donut" width="90" height="90"></canvas>
+          <div class="legend" id="donut-legend"><div style="font-size:11px;color:var(--text3)">Nessun dato</div></div>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Top 5 categorie</div>
+        <div class="bar-chart" id="bars"><div style="font-size:11px;color:var(--text3)">Nessun dato</div></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Trend ultimi 30 giorni</div>
+        <div class="trend-chart"><canvas id="trend"></canvas></div>
+        <div style="display:flex;justify-content:space-between;margin-top:6px">
+          <span style="font-size:9px;color:var(--text3);display:flex;align-items:center;gap:4px"><span style="width:12px;height:2px;background:var(--accent);display:inline-block;border-radius:1px"></span>Entrate</span>
+          <span style="font-size:9px;color:var(--text3);display:flex;align-items:center;gap:4px"><span style="width:12px;height:2px;background:var(--red);display:inline-block;border-radius:1px"></span>Uscite</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="action-bar">
+      <button class="abar-btn abar-sync" id="btn-sync" onclick="syncBank()">⚡ Sincronizza Banca</button>
+      <button class="abar-btn abar-import" onclick="openModal()">⬆ Importa PDF</button>
+      <button class="abar-btn abar-export" onclick="exportCsv()">⬇ Esporta CSV</button>
+      <div class="period-btns">
+        <button class="pbtn active" id="p-all" onclick="setPeriod('all')">Tutto</button>
+        <button class="pbtn" id="p-month" onclick="setPeriod('month')">Mese</button>
+        <button class="pbtn" id="p-3m" onclick="setPeriod('3m')">3 mesi</button>
+        <button class="pbtn" id="p-year" onclick="setPeriod('year')">Anno</button>
+      </div>
+    </div>
+    <div id="ob-status"></div>
+
+    <div class="filters-row">
+      <button class="fbtn active" id="ft-all" onclick="setTypeF('all')">Tutti</button>
+      <button class="fbtn" id="ft-in" onclick="setTypeF('entrata')">Entrate</button>
+      <button class="fbtn" id="ft-out" onclick="setTypeF('uscita')">Uscite</button>
+      <div class="search-wrap">
+        <span class="search-ico">🔍</span>
+        <input class="search-input" id="search" placeholder="Cerca..." oninput="renderTx()">
+      </div>
+    </div>
+
+    <div class="tx-section" id="tx-sec"></div>
+  </div>
+</div>
+
+<!-- IMPORT MODAL -->
+<div class="overlay" id="modal">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div><div style="font-size:15px;font-weight:700">📂 Importa estratto conto</div><div style="font-size:11px;color:var(--text3);margin-top:2px">L'AI estrae e categorizza automaticamente</div></div>
+      <button class="close-btn" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="s1">
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:7px">Preset banca</div>
+        <div class="presets"><button class="preset" onclick="setP('intesa')">Intesa Sanpaolo</button><button class="preset" onclick="setP('unicredit')">UniCredit</button><button class="preset" onclick="setP('fineco')">Fineco</button><button class="preset" onclick="setP('n26')">N26</button><button class="preset" onclick="setP('paypal')">PayPal</button></div>
+
+        <!-- DROP ZONE stile GitHub -->
+        <div id="drop-zone" style="margin-top:14px;border:2px dashed var(--border2);border-radius:12px;padding:36px 20px;text-align:center;cursor:pointer;transition:all .2s;position:relative;background:var(--surface2);"
+          ondragover="dzOver(event)" ondragleave="dzLeave(event)" ondrop="dzDrop(event)" onclick="$('file-input').click()">
+          <input type="file" id="file-input" accept=".pdf,.csv,.txt" style="display:none" onchange="handleFile(event)">
+          <div id="dz-icon" style="font-size:40px;margin-bottom:10px">📄</div>
+          <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px">
+            Trascina qui il file o <span style="color:var(--accent);text-decoration:underline">scegli il file</span>
+          </div>
+          <div style="font-size:11px;color:var(--text3)">PDF estratto conto · CSV · TXT — qualsiasi banca italiana</div>
+        </div>
+
+        <!-- OPPURE: incolla testo -->
+        <div style="display:flex;align-items:center;gap:10px;margin:14px 0 10px">
+          <div style="flex:1;height:1px;background:var(--border)"></div>
+          <span style="font-size:11px;color:var(--text3)">oppure</span>
+          <div style="flex:1;height:1px;background:var(--border)"></div>
+        </div>
+        <textarea id="paste-area" rows="4" placeholder="Incolla qui il testo copiato dal PDF (Ctrl+A → Copia → Incolla)..." style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:9px;color:var(--text);font-family:var(--mono);font-size:11px;padding:10px;resize:vertical;line-height:1.6;outline:none" oninput="if(this.value.length>10)$('analyze-btn').style.display='block'"></textarea>
+        <button class="sbtn sbtn-g" id="analyze-btn" style="width:100%;margin-top:9px;display:none" onclick="analyze()">✦ Analizza con AI</button>
+      </div>
+      <div id="s-load" style="display:none;text-align:center;padding:40px 0">
+        <div style="font-size:36px;margin-bottom:10px">🔍</div>
+        <div style="font-size:14px;font-weight:600;margin-bottom:5px">Analizzo…</div>
+        <div style="font-size:12px;color:var(--text3)" id="load-msg">Estraggo i movimenti</div>
+      </div>
+      <div id="s-prev" style="display:none">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px"><div style="font-size:13px;font-weight:600">Movimenti trovati</div><span id="prev-count" style="font-size:11px;color:var(--text3)"></span></div>
+        <div class="preview-scroll" style="max-height:240px"><table id="prev-table"></table></div>
+        <div class="row-btns" style="margin-top:10px"><button class="sbtn sbtn-ghost" onclick="ss('s1')">← Indietro</button><button class="sbtn sbtn-g" onclick="importAll()">✦ Importa tutto</button></div>
+        <div class="prog" id="imp-prog"></div>
+      </div>
+      <div id="s-done" style="display:none;text-align:center;padding:28px 0">
+        <div style="font-size:36px;margin-bottom:10px">✅</div>
+        <div style="font-size:16px;font-weight:700;margin-bottom:5px" id="done-t"></div>
+        <div style="font-size:12px;color:var(--text3)" id="done-s"></div>
+        <button class="sbtn sbtn-g" style="max-width:160px;margin:18px auto 0;display:block" onclick="closeModal()">Chiudi</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SCORE MODAL -->
+<div class="score-modal" id="score-modal">
+  <div class="sm-card">
+    <div style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:4px">💚 Salute Finanziaria</div>
+    <div class="sm-score" id="sm-score">—</div>
+    <div class="sm-label" id="sm-label"></div>
+    <div class="sm-items" id="sm-items"></div>
+    <button class="sm-close" onclick="$('score-modal').classList.remove('open')">Chiudi</button>
+  </div>
+</div>
+
+<!-- CHAT -->
+<div class="chat-drawer" id="chat-drawer">
+  <div class="cdh">
+    <div class="cdh-info">
+      <div class="cdh-av">💚</div>
+      <div><div class="cdh-name">Clark AI</div><div class="cdh-status"><div class="status-dot"></div>Online · conosce le tue finanze in tempo reale</div></div>
+    </div>
+    <button class="cd-close" onclick="toggleChat()">✕</button>
+  </div>
+  <div class="chat-msgs" id="chat-msgs">
+    <div class="cmsg ai"><div class="cav">💚</div><div class="cbubble" id="clark-welcome">Ciao! Sono Clark. Dimmi cosa vuoi sapere sulle tue finanze.</div></div>
+  </div>
+  <div class="cq-row">
+    <button class="cq" onclick="cq('Come sto andando?')">📊 Situazione</button>
+    <button class="cq" onclick="cq('Dove spreco di più?')">💸 Sprechi</button>
+    <button class="cq" onclick="cq('3 consigli per risparmiare basati sulle mie spese reali')">💡 Consigli</button>
+    <button class="cq" onclick="cq('Prevedi come finirò il mese')">🔮 Previsione</button>
+    <button class="cq" onclick="cq('Analizza il mio score finanziario e dimmi come migliorarlo')">⭐ Score</button>
+  </div>
+  <div class="cin-row">
+    <textarea id="cin" placeholder="Chiedimi qualcosa..." rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();clarkSend();}"></textarea>
+    <button class="csend" id="csend" onclick="clarkSend()">↑</button>
+  </div>
+</div>
+
+<!-- GMAIL SETUP MODAL -->
+<div class="gmail-overlay" id="gmail-overlay">
+  <div class="gmail-modal">
+    <div class="gm-header">
+      <div class="gm-icon" id="gm-icon">📧</div>
+      <div class="gm-title" id="gm-title">Collega il tuo conto a Clark</div>
+      <div class="gm-sub" id="gm-sub">Segui i passaggi guidati. Ci vogliono circa 5 minuti.<br>Nessuna password bancaria richiesta — Clark legge solo le email di notifica.</div>
+    </div>
+
+    <!-- PROGRESS BAR -->
+    <div class="gm-progress" style="padding:0 28px;margin:16px 0 0">
+      <div class="gm-step-dot active" id="gd1">1</div>
+      <div class="gm-step-line" id="gl1"></div>
+      <div class="gm-step-dot" id="gd2">2</div>
+      <div class="gm-step-line" id="gl2"></div>
+      <div class="gm-step-dot" id="gd3">3</div>
+      <div class="gm-step-line" id="gl3"></div>
+      <div class="gm-step-dot" id="gd4">4</div>
+    </div>
+    <div style="display:flex;justify-content:space-between;padding:6px 20px 0;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em">
+      <span>Notifiche</span><span style="margin-left:8px">Filtra email</span><span>Connetti Gmail</span><span>Fatto</span>
+    </div>
+
+    <div class="gm-body">
+
+      <!-- STEP 1: Attiva notifiche Intesa -->
+      <div class="gm-step-content active" id="gs1">
+        <div class="gm-step-title">📱 Attiva le notifiche email su Intesa Sanpaolo</div>
+        <div class="gm-step-desc">Per prima cosa dobbiamo dire a Intesa di mandarti un'email ogni volta che c'è un movimento sul conto. È gratuito e puoi disattivarlo quando vuoi.</div>
+
+        <div class="gm-tip">💡 <strong>Cosa succede:</strong> Intesa ti manda un'email ogni volta che paghi o ricevi denaro. Clark legge quelle email e aggiorna automaticamente le tue finanze.</div>
+
+        <div class="gm-card">
+          <div class="gm-card-title">🏦 Da App Intesa Sanpaolo (consigliato)</div>
+          <div class="gm-instruction"><div class="gm-num">1</div><div class="gm-text">Apri l'app <strong>Intesa Sanpaolo</strong> sul telefono</div></div>
+          <div class="gm-instruction"><div class="gm-num">2</div><div class="gm-text">Tocca l'icona del tuo profilo in alto a destra → <strong>Impostazioni</strong></div></div>
+          <div class="gm-instruction"><div class="gm-num">3</div><div class="gm-text">Vai su <strong>Notifiche</strong> → <strong>Notifiche via email</strong></div></div>
+          <div class="gm-instruction"><div class="gm-num">4</div><div class="gm-text">Attiva: <strong>"Movimenti conto corrente"</strong> e <strong>"Pagamenti con carta"</strong></div></div>
+          <div class="gm-instruction"><div class="gm-num">5</div><div class="gm-text">Verifica che l'email sia quella <strong>Gmail</strong> che usi normalmente</div></div>
+        </div>
+
+        <div class="gm-card">
+          <div class="gm-card-title">💻 Da sito web intesasanpaolo.com</div>
+          <div class="gm-instruction"><div class="gm-num">1</div><div class="gm-text">Vai su <strong>intesasanpaolo.com</strong> → accedi con le tue credenziali</div></div>
+          <div class="gm-instruction"><div class="gm-num">2</div><div class="gm-text">Menu in alto → <strong>Servizi</strong> → <strong>Notifiche e Avvisi</strong></div></div>
+          <div class="gm-instruction"><div class="gm-num">3</div><div class="gm-text">Seleziona <strong>"Avvisi via email"</strong> e attiva i movimenti del conto</div></div>
+        </div>
+
+        <!-- Mock visuale dell'interfaccia -->
+        <div class="gm-screenshot">
+          <div style="font-size:11px;margin-bottom:8px;color:var(--text2)">Così appare la schermata delle notifiche:</div>
+          <div class="gm-screen-mock">
+            <div class="gm-mock-row"><span class="gm-mock-label">📱 Notifiche push</span><div class="gm-mock-toggle"></div></div>
+            <div class="gm-mock-row"><span class="gm-mock-label">📧 <strong style="color:var(--accent)">Avvisi email movimenti</strong></span><div class="gm-mock-toggle"></div></div>
+            <div class="gm-mock-row"><span class="gm-mock-label">💳 Pagamenti con carta</span><div class="gm-mock-toggle"></div></div>
+            <div class="gm-mock-row"><span class="gm-mock-label">🔔 Avvisi saldo</span><div class="gm-mock-toggle off"></div></div>
+          </div>
+          <div style="margin-top:8px;font-size:11px;color:var(--accent)">✓ Attiva questi due interruttori (devono diventare verdi)</div>
+        </div>
+
+        <div class="gm-actions">
+          <button class="gm-btn gm-btn-ghost" onclick="closeGmailSetup()">Annulla</button>
+          <button class="gm-btn gm-btn-primary" onclick="gmailStep(2)">Ho attivato le notifiche →</button>
+        </div>
+      </div>
+
+      <!-- STEP 2: Crea filtro Gmail -->
+      <div class="gm-step-content" id="gs2">
+        <div class="gm-step-title">📬 Crea una cartella Gmail per le email Intesa</div>
+        <div class="gm-step-desc">Ora creiamo una cartella dedicata in Gmail dove finiscono solo le email di Intesa. Clark leggerà solo quella cartella — nient'altro.</div>
+
+        <div class="gm-tip">🔒 <strong>La tua privacy è protetta:</strong> Clark accede solo alle email di Intesa Sanpaolo, non legge nessuna altra email.</div>
+
+        <div class="gm-card">
+          <div class="gm-card-title">📧 Su Gmail — crea etichetta "Intesa Clark"</div>
+          <div class="gm-instruction"><div class="gm-num">1</div><div class="gm-text">Apri <strong>Gmail</strong> sul telefono o computer</div></div>
+          <div class="gm-instruction"><div class="gm-num">2</div><div class="gm-text">Menu laterale → scorri in basso → <strong>"Crea nuova etichetta"</strong></div></div>
+          <div class="gm-instruction"><div class="gm-num">3</div><div class="gm-text">Chiamala: <strong>Intesa Clark</strong> → conferma</div></div>
+          <div class="gm-instruction"><div class="gm-num">4</div><div class="gm-text">Ora vai su <strong>Impostazioni Gmail</strong> (⚙️) → <strong>Filtri e indirizzi bloccati</strong> → <strong>Crea nuovo filtro</strong></div></div>
+          <div class="gm-instruction"><div class="gm-num">5</div><div class="gm-text">Nel campo <strong>"Da"</strong> scrivi: <strong>noreply@intesasanpaolo.com</strong></div></div>
+          <div class="gm-instruction"><div class="gm-num">6</div><div class="gm-text">Clicca <strong>"Crea filtro"</strong> → spunta <strong>"Applica etichetta"</strong> → scegli <strong>Intesa Clark</strong></div></div>
+        </div>
+
+        <div class="gm-card" style="background:rgba(0,229,160,.04);border-color:rgba(0,229,160,.2)">
+          <div class="gm-card-title" style="color:var(--accent)">✨ In alternativa — più semplice</div>
+          <div class="gm-instruction"><div class="gm-num" style="background:var(--accent2)">1</div><div class="gm-text">Aspetta la prima email di notifica da Intesa (arriva entro il primo movimento)</div></div>
+          <div class="gm-instruction"><div class="gm-num" style="background:var(--accent2)">2</div><div class="gm-text">Aprila → clicca i <strong>tre puntini ⋯</strong> → <strong>"Filtra messaggi come questi"</strong></div></div>
+          <div class="gm-instruction"><div class="gm-num" style="background:var(--accent2)">3</div><div class="gm-text">Spunta <strong>"Applica etichetta"</strong> → <strong>Intesa Clark</strong> → Salva</div></div>
+        </div>
+
+        <div class="gm-actions">
+          <button class="gm-btn gm-btn-ghost" onclick="gmailStep(1)">← Indietro</button>
+          <button class="gm-btn gm-btn-primary" onclick="gmailStep(3)">Etichetta creata →</button>
+        </div>
+      </div>
+
+      <!-- STEP 3: Connetti Gmail a Clark -->
+      <div class="gm-step-content" id="gs3">
+        <div class="gm-step-title">🔌 Connetti Gmail a Clark</div>
+        <div class="gm-step-desc">Ora diamo a Clark il permesso di leggere le email nell'etichetta "Intesa Clark". Clicca il pulsante verde — ti porta su Google per autorizzare in sicurezza.</div>
+
+        <div class="gm-tip">🔐 <strong>Sicuro al 100%:</strong> usi il sistema ufficiale di Google. Clark non vede mai la tua password Gmail. Puoi revocare l'accesso in qualsiasi momento da <strong>myaccount.google.com</strong>.</div>
+
+        <div class="gm-card" style="text-align:center;padding:24px;">
+          <div style="font-size:36px;margin-bottom:12px">🔗</div>
+          <div style="font-size:14px;font-weight:600;margin-bottom:6px">Autorizza Clark a leggere le email Intesa</div>
+          <div style="font-size:12px;color:var(--text2);margin-bottom:18px;line-height:1.6">Clark leggerà <em>solo</em> le email nell'etichetta "Intesa Clark".<br>Nessuna altra email sarà accessibile.</div>
+          <button class="gm-sync-btn" onclick="connectGmail()" id="connect-gmail-btn">
+            <span>🔐 Accedi con Google</span>
+          </button>
+          <div class="gm-status" id="gmail-connect-status"></div>
+        </div>
+
+        <div class="gm-card">
+          <div class="gm-card-title">📋 Cosa succede quando clicchi:</div>
+          <div class="gm-instruction"><div class="gm-num">1</div><div class="gm-text">Si apre una finestra Google → scegli il tuo account Gmail</div></div>
+          <div class="gm-instruction"><div class="gm-num">2</div><div class="gm-text">Google chiede il permesso → clicca <strong>"Consenti"</strong></div></div>
+          <div class="gm-instruction"><div class="gm-num">3</div><div class="gm-text">Torni automaticamente su Clark → collegamento completato ✓</div></div>
+        </div>
+
+        <div class="gm-actions">
+          <button class="gm-btn gm-btn-ghost" onclick="gmailStep(2)">← Indietro</button>
+          <button class="gm-btn gm-btn-primary" id="gm-step3-next" onclick="gmailStep(4)" style="display:none">Connesso! Avanti →</button>
+        </div>
+      </div>
+
+      <!-- STEP 4: Completato -->
+      <div class="gm-step-content" id="gs4">
+        <div class="gm-connected">
+          <div class="gm-connected-icon">🎉</div>
+          <div class="gm-connected-title">Clark è collegato al tuo conto!</div>
+          <div class="gm-connected-sub">
+            Da ora in poi, ogni volta che Intesa ti manda un'email di notifica,<br>
+            Clark la legge e aggiorna le tue finanze <strong>automaticamente</strong>.<br><br>
+            Puoi anche sincronizzare manualmente in qualsiasi momento.
+          </div>
+          <button class="gm-sync-btn" onclick="syncGmail()" id="first-sync-btn">
+            ⚡ Sincronizza ora le ultime email
+          </button>
+          <div class="gm-status" id="first-sync-status"></div>
+          <button class="gm-btn gm-btn-ghost" style="width:100%;margin-top:10px" onclick="closeGmailSetup()">Chiudi e vai a Clark</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const sGet=async function(k){
+  try{
+    if(typeof window.storage!=='undefined'){
+      var r=await window.storage.get(k);
+      return r?JSON.parse(r.value):null;
+    }
+  }catch{}
+  try{var v=localStorage.getItem(k);return v?JSON.parse(v):null;}catch{return null;}
+};
+const sSet=async function(k,v){
+  try{
+    if(typeof window.storage!=='undefined'){
+      await window.storage.set(k,JSON.stringify(v));return;
+    }
+  }catch{}
+  try{localStorage.setItem(k,JSON.stringify(v));}catch{}
+};
+
+// GMAIL SETUP
+let gmailToken=null, gmailRefreshToken=null, gmailConnected=false, currentGmailStep=1;
+
+function openGmailSetup(){
+  $('gmail-overlay').classList.add('open');
+  if(gmailConnected){ gmailStep(4); }
+}
+function closeGmailSetup(){$('gmail-overlay').classList.remove('open');}
+
+function gmailStep(n){
+  currentGmailStep=n;
+  for(let i=1;i<=4;i++){
+    const dot=$(`gd${i}`);
+    dot.className='gm-step-dot'+(i<n?' done':i===n?' active':'');
+    if(i<4){$(`gl${i}`).className='gm-step-line'+(i<n?' done':'');}
+    $(`gs${i}`).classList.toggle('active',i===n);
+  }
+}
+
+// Ascolta il messaggio dal popup OAuth
+window.addEventListener('message', async (e) => {
+  if(e.data && e.data.type !== 'clark_gmail_auth') return;
+  gmailToken = e.data.access_token;
+  gmailRefreshToken = e.data.refresh_token;
+  gmailConnected = true;
+  await sSet('clark:gmail-token', { token: gmailToken, refresh: gmailRefreshToken, date: new Date().toISOString() });
+  $('gmail-connect-status').textContent = '✅ Gmail connesso con successo!';
+  $('gmail-connect-status').style.color = 'var(--accent)';
+  $('connect-gmail-btn').innerHTML = '<span>✅ Gmail connesso</span>';
+  $('connect-gmail-btn').style.background = 'var(--accent2)';
+  $('gm-step3-next').style.display = 'block';
+  updateGmailBtn();
+});
+
+async function connectGmail(){
+  const btn=$('connect-gmail-btn');
+  const status=$('gmail-connect-status');
+  btn.innerHTML='<span>⏳ Apertura Google...</span>';
+  btn.disabled=true;
+  status.textContent='';
+
+  // Apri popup OAuth su Render
+  const popup = window.open(
+    'https://ob-proxy.onrender.com/auth/google',
+    'clark_gmail_auth',
+    'width=500,height=600,scrollbars=yes,resizable=yes'
+  );
+
+  if(!popup){
+    // Popup bloccato — apri in nuova scheda
+    status.textContent='⚠️ Popup bloccato. Apri il link manualmente.';
+    const link=document.createElement('a');
+    link.href='https://ob-proxy.onrender.com/auth/google';
+    link.target='_blank';
+    link.style.cssText='display:block;margin-top:8px;color:var(--accent);font-size:13px;text-align:center';
+    link.textContent='→ Clicca qui per autorizzare Google';
+    btn.parentElement.appendChild(link);
+    btn.innerHTML='<span>🔐 Accedi con Google</span>';
+    btn.disabled=false;
+    return;
+  }
+
+  // Aspetta che il popup si chiuda
+  const checkClosed = setInterval(()=>{
+    if(popup.closed){
+      clearInterval(checkClosed);
+      if(!gmailConnected){
+        btn.innerHTML='<span>🔐 Accedi con Google</span>';
+        btn.disabled=false;
+        status.textContent='';
+      }
+    }
+  }, 500);
+}
+
+function updateGmailBtn(){
+  const btn=$('gmail-btn');
+  if(btn){
+    btn.textContent='✅ Banca collegata';
+    btn.style.cssText='border-color:var(--accent);color:var(--accent);background:rgba(0,229,160,.08)';
+  }
+}
+
+async function refreshGmailToken(){
+  if(!gmailRefreshToken) return false;
+  try{
+    const res=await fetch('https://ob-proxy.onrender.com/auth/refresh',{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({refresh_token:gmailRefreshToken})
+    });
+    const data=await res.json();
+    if(data.access_token){
+      gmailToken=data.access_token;
+      await sSet('clark:gmail-token',{token:gmailToken,refresh:gmailRefreshToken,date:new Date().toISOString()});
+      return true;
+    }
+  }catch{}
+  return false;
+}
+
+async function syncGmail(){
+  const btn=$('first-sync-btn');
+  const status=$('first-sync-status');
+  if(!gmailToken){status.textContent='⚠️ Prima connetti Gmail al passo 3.';return;}
+  btn.textContent='⏳ Leggo le email Intesa...';btn.disabled=true;status.textContent='';
+
+  try{
+    // Chiama il proxy Render che legge Gmail
+    let res=await fetch('https://ob-proxy.onrender.com/gmail/intesa',{
+      headers:{Authorization:`Bearer ${gmailToken}`}
+    });
+
+    // Token scaduto — prova refresh
+    if(res.status===401){
+      status.textContent='🔄 Token scaduto, rinnovo automatico...';
+      const refreshed=await refreshGmailToken();
+      if(!refreshed){status.textContent='⚠️ Sessione scaduta. Torna al passo 3 e riconnetti Gmail.';btn.textContent='⚡ Riprova';btn.disabled=false;return;}
+      res=await fetch('https://ob-proxy.onrender.com/gmail/intesa',{headers:{Authorization:`Bearer ${gmailToken}`}});
+    }
+
+    const data=await res.json();
+    const emails=data.emails||[];
+
+    if(!emails.length){
+      status.textContent='📭 Nessuna email Intesa trovata. Assicurati che le notifiche siano attive (Passo 1).';
+      btn.textContent='⚡ Riprova';btn.disabled=false;return;
+    }
+
+    status.textContent=`📧 ${emails.length} email trovate — estraggo movimenti con AI...`;
+
+    // Manda le email all'AI per estrarre i movimenti
+    const emailTexts=emails.map(e=>`[${e.date}]\n${e.text}`).join('\n---\n');
+    const aiRes=await fetch('https://ob-proxy.onrender.com/ai',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-6',max_tokens:1000,
+        system:`Estrai transazioni bancarie da email di notifica Intesa Sanpaolo. Ogni email contiene UN movimento. Restituisci SOLO array JSON: [{"date":"YYYY-MM-DD","desc":"descrizione breve del movimento","amount":12.50,"type":"uscita"}]. type="entrata" per accrediti/bonifici ricevuti, "uscita" per pagamenti/addebiti/prelievi. Usa la data tra parentesi quadre come data del movimento. Importi numerici senza simboli. Ignora email senza importo chiaro.`,
+        messages:[{role:'user',content:`Estrai le transazioni da queste ${emails.length} email Intesa:\n\n${emailTexts.slice(0,12000)}`}]
+      })
+    });
+    const aiData=await aiRes.json();
+    const raw=aiData.content && aiData.content.map(c=>c.text||'').join('')||'[]';
+    let extracted3=[];
+    try{extracted3=JSON.parse(raw.replace(/```json|```/g,'').trim());}catch{}
+
+    if(!extracted3.length){
+      status.textContent='⚠️ Nessun movimento trovato nelle email. Le notifiche sono attive?';
+      btn.textContent='⚡ Riprova';btn.disabled=false;return;
+    }
+
+    // Categorizza
+    const CATS3=Object.keys(COLORS);
+    const catRes=await fetch('https://ob-proxy.onrender.com/ai',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1000,
+        system:`Classifica in UNA di: ${CATS3.join(', ')}. SOLO array JSON.`,
+        messages:[{role:'user',content:extracted3.map((t,j)=>`${j+1}. "${t.desc}" ${t.type} €${t.amount}`).join('\n')}]
+      })
+    });
+    const catData=await catRes.json();
+    let cats3=[];
+    try{cats3=JSON.parse(catData.content && catData.content.map(c=>c.text||'').join('').replace(/```json|```/g,'').trim()||'[]');}catch{}
+
+    // Salva evitando duplicati
+    const existingKeys=new Set(txs.map(t=>t.desc+'_'+t.date));
+    let added=0;
+    extracted3.forEach((t,j)=>{
+      const key=t.desc+'_'+t.date;
+      if(!existingKeys.has(key)){
+        txs.unshift({id:Date.now()+added,date:t.date,desc:t.desc,amount:parseFloat(t.amount),type:t.type,
+          cat:CATS3.includes(cats3[j])?cats3[j]:(t.type==='entrata'?'Servizi':'Altro'),source:'gmail'});
+        added++;
+      }
+    });
+
+    await sSet('clark:txs',txs);render();
+    status.textContent=`✅ ${added} nuovi movimenti importati!`;
+    status.style.color='var(--accent)';
+    btn.textContent=`✅ ${added} movimenti importati`;
+    btn.style.background='var(--accent2)';
+
+  }catch(e){
+    status.textContent=`❌ Errore: ${e.message}`;
+    btn.textContent='⚡ Riprova';btn.disabled=false;
+  }
+}
+
+async function syncGmailFromBar(){
+  const stored=await sGet('clark:gmail-token');
+  if(!stored && stored.token){openGmailSetup();return;}
+  gmailToken=stored.token;gmailRefreshToken=stored.refresh;gmailConnected=true;
+
+  const btn=$('gmail-sync-bar-btn');
+  if(btn){btn.textContent='⏳ Sync...';btn.disabled=true;}
+
+  // Usa la stessa logica di syncGmail ma con feedback diverso
+  try{
+    let res=await fetch('https://ob-proxy.onrender.com/gmail/intesa',{headers:{Authorization:`Bearer ${gmailToken}`}});
+    if(res.status===401){
+      await refreshGmailToken();
+      res=await fetch('https://ob-proxy.onrender.com/gmail/intesa',{headers:{Authorization:`Bearer ${gmailToken}`}});
+    }
+    const data=await res.json();const emails=data.emails||[];
+    if(!emails.length){if(btn){btn.textContent='📧 Sync Email';btn.disabled=false;}obSt('📭 Nessuna nuova email Intesa.','n');return;}
+
+    const emailTexts=emails.map(e=>`[${e.date}]\n${e.text}`).join('\n---\n');
+    const aiRes=await fetch('https://ob-proxy.onrender.com/ai',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1000,system:`Estrai transazioni da email Intesa. SOLO JSON: [{"date":"YYYY-MM-DD","desc":"desc","amount":12.50,"type":"uscita"}].`,messages:[{role:'user',content:emailTexts.slice(0,12000)}]})});
+    const aiData=await aiRes.json();
+    let extr=[];try{extr=JSON.parse(aiData.content && aiData.content.map(c=>c.text||'').join('').replace(/```json|```/g,'').trim()||'[]');}catch{}
+
+    const keys=new Set(txs.map(t=>t.desc+'_'+t.date));let added=0;
+    extr.forEach(t=>{const k=t.desc+'_'+t.date;if(!keys.has(k)){txs.unshift({id:Date.now()+added,date:t.date,desc:t.desc,amount:parseFloat(t.amount),type:t.type,cat:'Altro',source:'gmail'});added++;}});
+    if(added){await sSet('clark:txs',txs);render();obSt(`✅ ${added} nuovi movimenti da email Intesa!`,'g');}
+    else{obSt('✅ Tutto aggiornato — nessun nuovo movimento.','g');}
+  }catch(e){obSt(`❌ ${e.message}`,'r');}
+  if(btn){btn.textContent='📧 Sync Email';btn.disabled=false;}
+}
+
+const COLORS={'Vendite prodotti':'#4da6ff','Affiliazioni':'#b97cff','Rimborsi ricevuti':'#ffd166','Fornitori':'#ff4d4d','Marketing & Ads':'#ff8c42','Software & Tools':'#ff4d8d','Logistica & Spedizioni':'#38b2ac','Tasse & Imposte':'#e53e3e','Personale':'#9f7aea','Alimentari':'#68d391','Ristoranti':'#f6ad55','Trasporti':'#76e4f7','Altro':'#718096'};
+const EMOJI={'Vendite prodotti':'🛍️','Servizi':'💼','Affiliazioni':'🔗','Rimborsi ricevuti':'↩️','Fornitori':'📦','Marketing & Ads':'📣','Software & Tools':'💻','Logistica & Spedizioni':'🚚','Tasse & Imposte':'🏛️','Personale':'👥','Alimentari':'🛒','Ristoranti':'🍽️','Trasporti':'🚗','Altro':'📂'};
+const CATS=Object.keys(COLORS);
+const FAVS=[{e:'🛒',n:'Spesa supermercato',a:50,c:'Alimentari',t:'uscita'},{e:'⛽',n:'Carburante',a:60,c:'Trasporti',t:'uscita'},{e:'☕',n:'Caffè',a:3,c:'Ristoranti',t:'uscita'},{e:'💊',n:'Farmacia',a:20,c:'Altro',t:'uscita'},{e:'🍕',n:'Consegna cibo',a:25,c:'Ristoranti',t:'uscita'}];
+const BUDGETS={'Alimentari':300,'Ristoranti':150,'Trasporti':100,'Marketing & Ads':200,'Software & Tools':80};
+
+let txs=[],txType='entrata',period='all',typeF='all',extracted=[],clarkHistory=[],chatOpen=false,userName='',userGoal='',monthlyBudget=1500,alerts=[],isDark=true,obStep=1;
+
+// ONBOARDING
+async function initApp(){
+  const saved=await sGet('clark:user');
+  if(saved&&saved.name){
+    userName=saved.name; userGoal=saved.goal; monthlyBudget=saved.budget||1500;
+    $('onboarding').style.display='none';
+    boot();
+  }
+}
+function obNext(step){
+  if(step===1){
+    const n=$('ob-name').value.trim();
+    if(!n){$('ob-name').focus();return;}
+    userName=n;
+    $('ob1').classList.remove('active');$('ob2').classList.add('active');
+    $('d1').classList.remove('active');$('d2').classList.add('active');
+  } else if(step===2){
+    $('ob2').classList.remove('active');$('ob3').classList.add('active');
+    $('d2').classList.remove('active');$('d3').classList.add('active');
+  }
+}
+function selGoal(el,g){document.querySelectorAll('.ob-goal').forEach(x=>x.classList.remove('sel'));el.classList.add('sel');userGoal=g;}
+async function obFinish(){
+  const b=parseInt($('ob-budget').value)||1500;
+  monthlyBudget=b;
+  await sSet('clark:user',{name:userName,goal:userGoal,budget:monthlyBudget});
+  $('onboarding').style.display='none';
+  $('clark-welcome').textContent=`Ciao ${userName}! Sono Clark, il tuo agente finanziario personale. Conosco le tue finanze in tempo reale e sono qui per aiutarti. Cosa vuoi sapere?`;
+  boot();
+}
+async function boot(){
+  $('f-date').value=new Date().toISOString().split('T')[0];
+  txs=await sGet('clark:txs')||[];
+  // Check Gmail connection
+  const gmailStored=await sGet('clark:gmail-token');
+  if(gmailStored && gmailStored.token){
+    gmailToken=gmailStored.token; gmailConnected=true;
+    updateGmailBtn();
+    // Add Gmail sync to action bar
+    const bar=document.querySelector('.action-bar');
+    if(bar&&!document.getElementById('gmail-sync-bar-btn')){
+      const btn=document.createElement('button');
+      btn.id='gmail-sync-bar-btn';
+      btn.className='abar-btn abar-sync';
+      btn.style.background='rgba(77,166,255,.12)';
+      btn.style.borderColor='var(--blue)';
+      btn.style.color='var(--blue)';
+      btn.textContent='📧 Sincronizza Email';
+      btn.onclick=syncGmailFromBar;
+      bar.insertBefore(btn,bar.children[1]);
+    }
+  }
+  renderFavs(); render(); updateTime();
+  setInterval(updateTime,60000);
+  if(userName) $('clark-welcome').textContent=`Ciao ${userName}! Sono Clark. Conosco le tue finanze in tempo reale. Cosa vuoi sapere?`;
+}
+initApp();
+
+function updateTime(){
+  const now=new Date();
+  $('nav-time').textContent='Aggiornato '+now.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});
+}
+
+// THEME
+function toggleTheme(){
+  isDark=!isDark;
+  document.body.classList.toggle('light',!isDark);
+  $('theme-btn').textContent=isDark?'🌙':'☀️';
+}
+
+// TYPE
+function setType(t){
+  txType=t;
+  $('btn-in').className='tbtn'+(t==='entrata'?' in':'');
+  $('btn-out').className='tbtn'+(t==='uscita'?' out':'');
+}
+
+// ADD TX
+async function addTx(){
+  const desc=$('f-desc').value.trim(),amount=parseFloat($('f-amt').value),cat=$('f-cat').value,date=$('f-date').value;
+  if(!desc||!amount||!cat||!date){
+    const first=[desc,amount,cat,date].findIndex(v=>!v);
+    ['f-desc','f-amt','f-cat','f-date'][first]&&$(['f-desc','f-amt','f-cat','f-date'][first]).focus();
+    return;
+  }
+  txs.unshift({id:Date.now(),type:txType,desc,amount,cat,date});
+  await sSet('clark:txs',txs);
+  $('f-desc').value='';$('f-amt').value='';$('f-cat').value='';
+  const btn=$('add-btn'); const t=$('add-btn-text');
+  t.textContent='Aggiunto ✓'; btn.style.background='var(--accent2)';
+  setTimeout(()=>{t.textContent='Registra';btn.style.background='';},1200);
+  render();
+}
+
+async function delTx(id,e){e.stopPropagation();txs=txs.filter(t=>t.id!==id);await sSet('clark:txs',txs);render();}
+async function useFav(n,a,c,t){const date=new Date().toISOString().split('T')[0];txs.unshift({id:Date.now(),type:t,desc:n,amount:a,cat:c,date});await sSet('clark:txs',txs);render();}
+
+// FAVS
+function renderFavs(){
+  $('favs').innerHTML=FAVS.map(f=>`
+    <div class="fav-item" onclick="useFav('${f.n}',${f.a},'${f.c}','${f.t}')">
+      <span class="fav-emoji">${f.e}</span>
+      <div class="fav-info"><div class="fav-name">${f.n}</div><div class="fav-amt">−€${f.a} · ${f.c}</div></div>
+      <span class="fav-plus">＋</span>
+    </div>`).join('');
+}
+
+// PERIOD / TYPE FILTER
+function setPeriod(p){
+  period=p;
+  ['all','month','3m','year'].forEach(x=>$('p-'+x).classList.toggle('active',x===p));
+  render();
+}
+function setTypeF(f){
+  typeF=f;
+  ['all','in','out'].forEach(x=>$('ft-'+x).classList.toggle('active',x===(f==='entrata'?'in':f==='uscita'?'out':f)));
+  renderTx();
+}
+function byPeriod(list){
+  const now=new Date(),y=now.getFullYear(),m=now.getMonth();
+  if(period==='month')return list.filter(t=>{const d=new Date(t.date);return d.getFullYear()===y&&d.getMonth()===m;});
+  if(period==='3m')return list.filter(t=>new Date(t.date)>=new Date(now-90*864e5));
+  if(period==='year')return list.filter(t=>new Date(t.date).getFullYear()===y);
+  return list;
+}
+
+// RENDER
+function render(){
+  const filtered=byPeriod(txs);
+  const inTxs=filtered.filter(t=>t.type==='entrata'),outTxs=filtered.filter(t=>t.type==='uscita');
+  const inTot=inTxs.reduce((s,t)=>s+t.amount,0),outTot=outTxs.reduce((s,t)=>s+t.amount,0),net=inTot-outTot;
+  const avg=filtered.length?filtered.reduce((s,t)=>s+t.amount,0)/filtered.length:0;
+
+  // Previous month for delta
+  const now=new Date(),prevStart=new Date(now.getFullYear(),now.getMonth()-1,1),prevEnd=new Date(now.getFullYear(),now.getMonth(),0);
+  const prevTxs=txs.filter(t=>{const d=new Date(t.date);return d>=prevStart&&d<=prevEnd;});
+  const prevIn=prevTxs.filter(t=>t.type==='entrata').reduce((s,t)=>s+t.amount,0);
+  const prevOut=prevTxs.filter(t=>t.type==='uscita').reduce((s,t)=>s+t.amount,0);
+
+  $('s-in').textContent='€'+fmt(inTot);$('s-in-sub').textContent=inTxs.length+' transazioni';
+  $('s-out').textContent='€'+fmt(outTot);$('s-out-sub').textContent=outTxs.length+' transazioni';
+  $('s-net').textContent=(net>=0?'€':'-€')+fmt(Math.abs(net));
+  $('s-net').className='sc-val'; $('s-net').style.color=net>=0?'var(--blue)':'var(--red)';
+  $('s-count').textContent=filtered.length;$('s-avg').textContent='media €'+fmt(avg);
+
+  if(period==='month'&&prevIn>0){showDelta('s-in-delta',inTot,prevIn);}
+  if(period==='month'&&prevOut>0){showDelta('s-out-delta',outTot,prevOut,true);}
+
+  calcScore(inTot,outTot,filtered);
+  drawDonut(outTxs);drawBars(outTxs);drawTrend();
+  renderBudgets(outTxs);
+  checkAlerts(outTxs,outTot);
+  renderTx();
+}
+
+function showDelta(id,curr,prev,invert=false){
+  const el=$(id);if(!el)return;
+  const pct=((curr-prev)/prev*100);
+  const up=pct>=0;
+  el.style.display='inline-block';
+  el.textContent=(up?'↑':'↓')+Math.abs(pct).toFixed(0)+'% vs mese scorso';
+  el.className='sc-delta '+((up&&!invert)||(!up&&invert)?'up':'down');
+}
+
+function fmt(n){return n.toFixed(2).replace('.',',');}
+
+// SCORE
+function calcScore(inTot,outTot,filtered){
+  if(!filtered.length){$('hb-score').textContent='—';$('hb-fill').style.width='0%';$('nav-score').textContent='—';$('hb-desc').textContent='Aggiungi transazioni per calcolare il tuo score.';return;}
+  let score=50;
+  const ratio=outTot>0?inTot/outTot:2;
+  if(ratio>=2)score+=25;else if(ratio>=1.5)score+=15;else if(ratio>=1)score+=5;else score-=20;
+  const cats=new Set(filtered.map(t=>t.cat)).size;
+  if(cats>=5)score+=10;else if(cats>=3)score+=5;
+  const hasIncome=filtered.some(t=>t.type==='entrata');
+  if(hasIncome)score+=10;
+  if(filtered.length>=10)score+=5;
+  score=Math.max(0,Math.min(100,score));
+  $('hb-score').textContent=score+'/100';
+  $('nav-score').textContent=score;
+  const hbFill=$('hb-fill');
+  hbFill.style.width=score+'%';
+  if(score>=80){hbFill.style.background='var(--accent)';$('hb-desc').textContent='💚 Ottimo! Le tue finanze sono in salute. Continua così.';}
+  else if(score>=60){hbFill.style.background='var(--yellow)';$('hb-desc').textContent='🟡 Buono! Qualche miglioramento e raggiungerai l\'eccellenza.';}
+  else if(score>=40){hbFill.style.background='var(--orange)';$('hb-desc').textContent='🟠 Nella media. Riduci le uscite o aumenta le entrate.';}
+  else{hbFill.style.background='var(--red)';$('hb-desc').textContent='🔴 Attenzione! Le uscite superano le entrate. Rivedi il budget.';}
+  $('sm-score').textContent=score;
+  $('sm-label').textContent=score>=80?'Ottima salute finanziaria 💚':score>=60?'Buona salute finanziaria 🟡':score>=40?'Salute nella media 🟠':'Salute finanziaria critica 🔴';
+}
+
+function openScore(){
+  const inTot=byPeriod(txs).filter(t=>t.type==='entrata').reduce((s,t)=>s+t.amount,0);
+  const outTot=byPeriod(txs).filter(t=>t.type==='uscita').reduce((s,t)=>s+t.amount,0);
+  const ratio=outTot>0?(inTot/outTot).toFixed(2):'-';
+  const cats=new Set(byPeriod(txs).map(t=>t.cat)).size;
+  $('sm-items').innerHTML=[
+    {ok:parseFloat(ratio)>=1.5,t:`Rapporto entrate/uscite: ${ratio}x`,hint:'Ideale > 1.5x'},
+    {ok:cats>=3,t:`Categorie tracciate: ${cats}`,hint:'Ideale ≥ 3 categorie'},
+    {ok:txs.some(t=>t.type==='entrata'),t:'Entrate registrate',hint:'Fondamentale per il calcolo'},
+    {ok:txs.length>=10,t:`Storico transazioni: ${txs.length}`,hint:'Più dati = score più preciso'},
+  ].map(x=>`<div class="sm-item"><span class="sm-icon">${x.ok?'✅':'⚠️'}</span><div><div>${x.t}</div><div style="font-size:10px;color:var(--text3)">${x.hint}</div></div></div>`).join('');
+  $('score-modal').classList.add('open');
+}
+
+// ALERTS
+function checkAlerts(outTxs,outTot){
+  alerts=[];
+  const now=new Date();
+  const monthOutTxs=txs.filter(t=>{const d=new Date(t.date);return t.type==='uscita'&&d.getFullYear()===now.getFullYear()&&d.getMonth()===now.getMonth();});
+  const monthOut=monthOutTxs.reduce((s,t)=>s+t.amount,0);
+  if(monthlyBudget&&monthOut>monthlyBudget*0.8){alerts.push({icon:'⚠️',text:`Hai già speso <strong>€${fmt(monthOut)}</strong> di budget mensile (limite €${fmt(monthlyBudget)})`});}
+  const byCat={};monthOutTxs.forEach(t=>{byCat[t.cat]=(byCat[t.cat]||0)+t.amount;});
+  const prevStart=new Date(now.getFullYear(),now.getMonth()-1,1),prevEnd=new Date(now.getFullYear(),now.getMonth(),0);
+  const prevCat={};txs.filter(t=>{const d=new Date(t.date);return t.type==='uscita'&&d>=prevStart&&d<=prevEnd;}).forEach(t=>{prevCat[t.cat]=(prevCat[t.cat]||0)+t.amount;});
+  Object.entries(byCat).forEach(([cat,val])=>{if(prevCat[cat]&&val>prevCat[cat]*1.5){alerts.push({icon:'📈',text:`Spese in <strong>${cat}</strong> aumentate del <strong>${((val/prevCat[cat]-1)*100).toFixed(0)}%</strong> rispetto al mese scorso`});}});
+  if(outTot>0&&txs.filter(t=>t.type==='entrata').length===0){alerts.push({icon:'💡',text:'Nessuna entrata registrata. Aggiungi le tue fonti di reddito per uno score accurato.'});}
+  const navAlert=$('nav-alert');
+  if(alerts.length){navAlert.classList.add('show');$('alerts-list').innerHTML=alerts.map(a=>`<div class="alert-item"><span class="ai-icon">${a.icon}</span><div class="ai-text">${a.text}</div></div>`).join('');}
+  else{navAlert.classList.remove('show');}
+}
+
+function toggleAlerts(){$('alerts-panel').classList.toggle('open');}
+document.addEventListener('click',e=>{if(!e.target.closest('#alerts-panel')&&!e.target.closest('#nav-alert'))$('alerts-panel').classList.remove('open');});
+
+// BUDGET
+function renderBudgets(outTxs){
+  const byCat={};outTxs.forEach(t=>{byCat[t.cat]=(byCat[t.cat]||0)+t.amount;});
+  $('budget-list').innerHTML=Object.entries(BUDGETS).map(([cat,limit])=>{
+    const spent=byCat[cat]||0,pct=Math.min(100,(spent/limit*100)),color=pct>90?'var(--red)':pct>70?'var(--yellow)':'var(--accent)';
+    return `<div class="budget-item">
+      <div class="budget-row"><span class="budget-cat">${EMOJI[cat]||'📂'} ${cat}</span><span class="budget-vals">€${fmt(spent)} / €${fmt(limit)}</span></div>
+      <div class="budget-track"><div class="budget-fill" style="width:${pct.toFixed(1)}%;background:${color}"></div></div>
+    </div>`;}).join('');
+}
+
+// TX LIST
+function renderTx(){
+  const search=$('search').value.toLowerCase();
+  let list=byPeriod(txs);
+  if(typeF!=='all')list=list.filter(t=>t.type===typeF);
+  if(search)list=list.filter(t=>t.desc.toLowerCase().includes(search)||t.cat.toLowerCase().includes(search));
+  if(!list.length){
+    $('tx-sec').innerHTML=`<div class="empty-tx"><div class="ei">${search?'🔍':'💸'}</div><div class="et">${search?'Nessun risultato':'Nessuna transazione'}</div><div class="es">${search?'Prova con un altro termine':'Registra la prima transazione a sinistra o importa il tuo estratto conto'}</div></div>`;
+    return;
+  }
+  const groups={};
+  list.forEach(t=>{const d=fmtD(t.date);groups[d]=groups[d]||[];groups[d].push(t);});
+  $('tx-sec').innerHTML=Object.entries(groups).map(([date,items])=>`
+    <div class="tx-group-label">${date} <span style="color:var(--text3);font-size:9px">· ${items.length} mov.</span></div>
+    ${items.map(t=>`
+      <div class="tx-item">
+        <div class="tx-icon" style="background:${(COLORS[t.cat]||'#718096')}18">${EMOJI[t.cat]||'📂'}</div>
+        <div class="tx-body">
+          <div class="tx-desc">${t.desc}</div>
+          <div class="tx-meta">
+            <span class="tx-tag" style="background:${(COLORS[t.cat]||'#718096')}18;color:${COLORS[t.cat]||'#718096'}">${t.cat}</span>
+            <span>${t.type==='entrata'?'↑ entrata':'↓ uscita'}</span>
+          </div>
+        </div>
+        <div class="tx-right">
+          <span class="tx-amt ${t.type==='entrata'?'in':'out'}">${t.type==='entrata'?'+':'-'}€${fmt(t.amount)}</span>
+          <button class="tx-del" onclick="delTx(${t.id},event)">✕ elimina</button>
+        </div>
+      </div>`).join('')}`).join('');
+}
+
+function fmtD(d){
+  const date=new Date(d),now=new Date();
+  if(date.toDateString()===now.toDateString())return 'Oggi';
+  if(date.toDateString()===new Date(now-864e5).toDateString())return 'Ieri';
+  return date.toLocaleDateString('it-IT',{weekday:'short',day:'numeric',month:'short'});
+}
+
+// CHARTS
+function drawDonut(outTxs){
+  const cv=$('donut'),ctx=cv.getContext('2d'),leg=$('donut-legend');
+  ctx.clearRect(0,0,90,90);
+  const byCat={};outTxs.forEach(t=>{byCat[t.cat]=(byCat[t.cat]||0)+t.amount;});
+  const sorted=Object.entries(byCat).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  const total=sorted.reduce((s,[,v])=>s+v,0);
+  if(!total){leg.innerHTML='<div style="font-size:11px;color:var(--text3)">Nessuna uscita</div>';return;}
+  let angle=-Math.PI/2;
+  sorted.forEach(([cat,val])=>{
+    const sl=(val/total)*Math.PI*2;
+    ctx.beginPath();ctx.moveTo(45,45);ctx.arc(45,45,40,angle,angle+sl);ctx.closePath();
+    ctx.fillStyle=COLORS[cat]||'#718096';ctx.fill();angle+=sl;
+  });
+  ctx.beginPath();ctx.arc(45,45,22,0,Math.PI*2);ctx.fillStyle=getComputedStyle(document.body).getPropertyValue('--surface').trim()||'#111113';ctx.fill();
+  leg.innerHTML=sorted.map(([cat,val])=>`<div class="leg"><div class="leg-dot" style="background:${COLORS[cat]||'#718096'}"></div><span class="leg-name">${cat}</span><span class="leg-val">€${fmt(val)}</span></div>`).join('');
+}
+
+function drawBars(outTxs){
+  const byCat={};outTxs.forEach(t=>{byCat[t.cat]=(byCat[t.cat]||0)+t.amount;});
+  const sorted=Object.entries(byCat).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const max=sorted[0]?sorted[0][1]:1||1;
+  $('bars').innerHTML=sorted.length?sorted.map(([cat,val])=>`
+    <div class="bar-row">
+      <span class="bar-label">${EMOJI[cat]||'📂'} ${cat.split(' ')[0]}</span>
+      <div class="bar-track"><div class="bar-fill" style="width:${(val/max*100).toFixed(0)}%;background:${COLORS[cat]||'#718096'}"></div></div>
+      <span class="bar-val">€${fmt(val)}</span>
+    </div>`).join(''):'<div style="font-size:11px;color:var(--text3)">Nessuna uscita</div>';
+}
+
+function drawTrend(){
+  const cv=$('trend'),ctx=cv.getContext('2d');
+  cv.width=cv.parentElement.offsetWidth||200; cv.height=80;
+  ctx.clearRect(0,0,cv.width,80);
+  const days=30,W=cv.width,H=80,pad={t:8,b:8,l:4,r:4};
+  const series={in:Array(days).fill(0),out:Array(days).fill(0)};
+  const now=new Date();
+  txs.forEach(t=>{
+    const diff=Math.floor((now-new Date(t.date))/864e5);
+    if(diff>=0&&diff<days){const i=days-1-diff;series[t.type==='entrata'?'in':'out'][i]+=t.amount;}
+  });
+  const allVals=[...series.in,...series.out];const max=Math.max(...allVals,1);
+  const drawLine=(data,color)=>{
+    ctx.beginPath();ctx.strokeStyle=color;ctx.lineWidth=1.5;ctx.lineJoin='round';
+    data.forEach((v,i)=>{
+      const x=pad.l+(i/(days-1))*(W-pad.l-pad.r);
+      const y=pad.t+(1-v/max)*(H-pad.t-pad.b);
+      i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+    });
+    ctx.stroke();
+    ctx.lineTo(W-pad.r,H);ctx.lineTo(pad.l,H);ctx.closePath();
+    ctx.fillStyle=color.replace(')',', 0.08)').replace('rgb','rgba').replace('#','');
+    try{const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,color+'33');g.addColorStop(1,color+'00');ctx.fillStyle=g;ctx.fill();}catch{}
+  };
+  drawLine(series.out,'#ff4d4d');drawLine(series.in,'#00e5a0');
+}
+
+// EXPORT
+function exportCsv(){
+  if(!txs.length){alert('Nessuna transazione.');return;}
+  const blob=new Blob(['Data,Descrizione,Tipo,Categoria,Importo\n'+txs.map(t=>`${t.date},"${t.desc}",${t.type},${t.cat},${t.type==='entrata'?'':'-'}${t.amount.toFixed(2)}`).join('\n')],{type:'text/csv;charset=utf-8;'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`clark_${new Date().toISOString().split('T')[0]}.csv`;a.click();
+}
+
+// DRAG & DROP
+function dzOver(e){
+  e.preventDefault();
+  var dz=$('drop-zone');
+  if(!dz)return;
+  dz.style.borderColor='var(--accent)';
+  dz.style.background='rgba(0,229,160,.06)';
+  $('dz-icon').textContent='📥';
+}
+function dzLeave(){
+  var dz=$('drop-zone');
+  if(!dz)return;
+  dz.style.borderColor='var(--border2)';
+  dz.style.background='var(--surface2)';
+  $('dz-icon').textContent='📄';
+}
+function dzDrop(e){
+  e.preventDefault();
+  dzLeave();
+  var file=e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files[0];
+  if(file)processFile(file);
+}
+function handleFile(e){
+  var file=e.target&&e.target.files&&e.target.files[0];
+  if(file)processFile(file);
+}
+function processFile(file){
+  var dz=$('drop-zone');
+  if(dz){
+    dz.style.borderColor='var(--accent)';
+    dz.innerHTML='<div style="font-size:32px;margin-bottom:8px">⏳</div><div style="font-size:13px;font-weight:600;color:var(--accent)">'+file.name+'</div><div style="font-size:11px;color:var(--text3);margin-top:4px">Lettura in corso...</div>';
+  }
+
+  var isPdf = file.name.toLowerCase().endsWith('.pdf') || file.type === 'application/pdf';
+
+  var reader = new FileReader();
+
+  if(isPdf) {
+    reader.onload = function(ev) {
+      var base64 = ev.target.result.split(',')[1];
+      if(dz) dz.innerHTML='<div style="font-size:32px;margin-bottom:8px">🤖</div><div style="font-size:13px;font-weight:600;color:var(--accent)">'+file.name+'</div><div style="font-size:11px;color:var(--text3);margin-top:4px">Invio a Clark AI...</div>';
+      analyzePdfDirect(base64, file.name);
+    };
+    reader.onerror = function() {
+      if(dz) dz.innerHTML='<div style="font-size:32px">⚠️</div><div style="font-size:13px;color:var(--red);margin-top:8px">Errore lettura file.</div>';
+    };
+    reader.readAsDataURL(file);
+  } else {
+    reader.onload = function(ev) {
+      var text = ev.target.result || '';
+      if(dz) dz.innerHTML='<div style="font-size:32px;margin-bottom:8px">✅</div><div style="font-size:13px;font-weight:600;color:var(--accent)">'+file.name+'</div><div style="font-size:11px;color:var(--text3);margin-top:4px">Pronto!</div>';
+      $('paste-area').value = text;
+      var btn = $('analyze-btn');
+      btn.style.display = 'block';
+      btn.textContent = '✦ Analizza '+file.name+' con AI';
+    };
+    reader.readAsText(file, 'UTF-8');
+  }
+}
+
+async function analyzePdfDirect(base64, fileName) {
+  ss('s-load');
+  $('load-msg').textContent = 'Clark legge il PDF...';
+  try {
+    var res = await fetch('https://ob-proxy.onrender.com/ai', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1000,
+        messages: [{
+          role: 'user',
+          content: [
+            {
+              type: 'document',
+              source: { type: 'base64', media_type: 'application/pdf', data: base64 }
+            },
+            {
+              type: 'text',
+              text: 'Estrai TUTTI i movimenti bancari da questo estratto conto Intesa Sanpaolo. Restituisci SOLO un array JSON valido: [{"date":"YYYY-MM-DD","desc":"descrizione breve","amount":12.50,"type":"uscita"}]. type="entrata" per Accrediti e bonifici ricevuti, type="uscita" per Addebiti e pagamenti. Date GG.MM.AAAA->YYYY-MM-DD. Importi: rimuovi spazi, virgola=decimale ("8, 99"->8.99, "1 721, 97"->1721.97). Ignora saldi totali, intestazioni, canoni, interessi. Solo movimenti singoli con data, descrizione e importo.'
+            }
+          ]
+        }]
+      })
+    });
+    var d = await res.json();
+    var raw = (d.content && d.content.map(function(c){ return c.text||''; }).join('')) || '[]';
+    try { extracted = JSON.parse(raw.replace(/```json|```/g,'').trim()); } catch(e) { extracted = []; }
+    if(!extracted.length) { ss('s1'); alert('Nessun movimento trovato nel PDF.'); return; }
+    showPrev();
+  } catch(e) {
+    ss('s1');
+    alert('Errore: ' + e.message);
+  }
+}
+function fmtBytes(b){
+  if(b<1024)return b+'B';
+  if(b<1048576)return Math.round(b/1024)+'KB';
+  return (b/1048576).toFixed(1)+'MB';
+}
+
+// IMPORT MODAL
+function ss(id){['s1','s-load','s-prev','s-done'].forEach(function(s){var el=$(s);if(el)el.style.display='none';});var t=$(id);if(t)t.style.display='block';}
+function openModal(){$('modal').classList.add('open');ss('s1');}
+function closeModal(){
+  $('modal').classList.remove('open');
+  extracted=[];
+  $('paste-area').value='';
+  var ab=$('analyze-btn');if(ab)ab.style.display='none';
+  document.querySelectorAll('.preset').forEach(function(b){b.classList.remove('active');});
+  var dz=$('drop-zone');
+  if(dz)dz.innerHTML='<input type="file" id="file-input" accept=".pdf,.csv,.txt" style="display:none" onchange="handleFile(event)"><div id="dz-icon" style="font-size:40px;margin-bottom:10px">📄</div><div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px">Trascina qui il file o <span style="color:var(--accent);text-decoration:underline">scegli il file</span></div><div style="font-size:11px;color:var(--text3)">PDF estratto conto · CSV · TXT — qualsiasi banca italiana</div>';
+}
+function setP(n){document.querySelectorAll('.preset').forEach(b=>b.classList.remove('active'));document.querySelector(`.preset[onclick="setP('${n}')"]`).classList.add('active');}
+
+async function analyze(){
+  const text=$('paste-area').value.trim();
+  if(!text||text.length<50){alert('Incolla il testo dell\'estratto conto.');return;}
+  ss('s-load');$('load-msg').textContent="Estraggo i movimenti con AI…";
+  try{
+    const res=await fetch('https://ob-proxy.onrender.com/ai',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1000,system:`Estrai movimenti bancari. Restituisci SOLO array JSON: [{"date":"YYYY-MM-DD","desc":"descrizione","amount":12.50,"type":"uscita"}]. type="entrata" per accrediti, "uscita" per addebiti. Converti date italiane. Rimuovi spazi dagli importi. Ignora saldi.`,messages:[{role:'user',content:`Estrai:\n\n${text.slice(0,15000)}`}]})});
+    const d=await res.json();const raw=d.content && d.content.map(c=>c.text||'').join('')||'[]';
+    try{extracted=JSON.parse(raw.replace(/```json|```/g,'').trim());}catch{extracted=[];}
+    if(!extracted.length){ss('s1');alert('Nessun movimento trovato.');return;}
+    showPrev();
+  }catch{ss('s1');alert('Errore di connessione.');}
+}
+
+function showPrev(){
+  $('prev-count').textContent=`${extracted.length} movimenti trovati`;
+  const rows=extracted.slice(0,10).map(t=>`<tr><td>${t.date}</td><td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${t.desc}</td><td><span class="pill ${t.type==='entrata'?'pill-in':'pill-out'}">${t.type}</span></td><td style="font-family:var(--mono)">${t.type==='entrata'?'+':'-'}€${parseFloat(t.amount).toFixed(2)}</td></tr>`).join('');
+  const more=extracted.length>10?`<tr><td colspan="4" style="text-align:center;color:var(--text3);font-style:italic">… e altri ${extracted.length-10}</td></tr>`:'';
+  $('prev-table').innerHTML=`<tr><th>Data</th><th>Descrizione</th><th>Tipo</th><th>Importo</th></tr>${rows}${more}`;
+  ss('s-prev');
+}
+
+async function importAll(){
+  const prog=$('imp-prog');if(!extracted.length)return;
+  const B=15;let imp=0;
+  for(let i=0;i<extracted.length;i+=B){
+    const batch=extracted.slice(i,i+B);prog.textContent=`Categorizzo ${Math.min(i+B,extracted.length)}/${extracted.length}…`;
+    let cats=[];
+    try{const r=await fetch('https://ob-proxy.onrender.com/ai',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1000,system:`Classifica in UNA di: ${CATS.join(', ')}. SOLO array JSON.`,messages:[{role:'user',content:batch.map((t,j)=>`${j+1}. "${t.desc}" ${t.type} €${t.amount}`).join('\n')}]})});const d=await r.json();cats=JSON.parse(d.content && d.content.map(c=>c.text||'').join('').replace(/```json|```/g,'').trim()||'[]');}catch{}
+    batch.forEach((t,j)=>{txs.unshift({id:Date.now()+imp,date:t.date,desc:t.desc,amount:parseFloat(t.amount),type:t.type,cat:CATS.includes(cats[j])?cats[j]:(t.type==='entrata'?'Servizi':'Altro')});imp++;});
+  }
+  await sSet('clark:txs',txs);render();
+  $('done-t').textContent=`${imp} movimenti importati!`;$('done-s').textContent='Categorizzati e aggiunti al tuo registro.';ss('s-done');
+}
+
+// OPEN BANKING
+const PROXY='https://ob-proxy.onrender.com';
+function obSt(msg,c){const el=$('ob-status');el.style.display='block';el.style.cssText+=`;background:${c==='g'?'rgba(0,229,160,.08)':c==='r'?'rgba(255,77,77,.08)':'rgba(107,107,114,.08)'};color:${c==='g'?'var(--accent)':c==='r'?'var(--red)':'var(--text3)'};border:1px solid ${c==='g'?'rgba(0,229,160,.2)':c==='r'?'rgba(255,77,77,.2)':'var(--border)'};border-radius:8px`;el.textContent=msg;}
+
+async function syncBank(){
+  const btn=$('btn-sync');btn.textContent='⏳…';btn.disabled=true;
+  try{
+    obSt('🔄 Avvio server...','n');
+    const res=await fetch(`${PROXY}/sync`);
+    if(!res.ok){const e=await res.json();throw new Error(e.error||'Errore');}
+    const data=await res.json();const allTx=data.transactions||[];
+    if(!allTx.length){obSt('ℹ️ Nessun movimento trovato.','n');btn.textContent='⚡ Sincronizza Banca';btn.disabled=false;return;}
+    const ids=new Set(txs.map(t=>t.obId).filter(Boolean));
+    const newTx=allTx.filter(t=>!ids.has(t.transaction_id));
+    if(!newTx.length){obSt('✅ Tutto aggiornato.','g');btn.textContent='⚡ Sincronizza Banca';btn.disabled=false;return;}
+    obSt(`🤖 Categorizzo ${newTx.length} movimenti...`,'n');
+    let imp=0;
+    for(let i=0;i<newTx.length;i+=15){
+      const b=newTx.slice(i,i+15);let cats=[];
+      try{const r=await fetch('https://ob-proxy.onrender.com/ai',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1000,system:`Classifica in: ${CATS.join(', ')}. SOLO JSON.`,messages:[{role:'user',content:b.map((t,j)=>`${j+1}."${t.remittance_information||t.creditor_name||'Mov'}"`).join('\n')}]})});const d=await r.json();cats=JSON.parse(d.content && d.content.map(c=>c.text||'').join('').replace(/```json|```/g,'').trim()||'[]');}catch{}
+      b.forEach((t,j)=>{const amt=Math.abs(parseFloat((t.transaction_amount&&t.transaction_amount.amount)||0)),type=parseFloat((t.transaction_amount&&t.transaction_amount.amount)||0)>=0?'entrata':'uscita',desc=t.remittance_information||t.creditor_name||t.debtor_name||'Movimento';txs.unshift({id:Date.now()+imp,obId:t.transaction_id,date:t.booking_date,desc,amount:amt,type,cat:CATS.includes(cats[j])?cats[j]:(type==='entrata'?'Servizi':'Altro')});imp++;});
+    }
+    await sSet('clark:txs',txs);render();obSt(`✅ ${imp} movimenti sincronizzati!`,'g');
+  }catch(e){obSt(`❌ ${e.message}`,'r');}
+  btn.textContent='⚡ Sincronizza Banca';btn.disabled=false;
+}
+
+// CHAT
+function toggleChat(){chatOpen=!chatOpen;$('chat-drawer').classList.toggle('open',chatOpen);}
+function cq(t){$('cin').value=t;clarkSend();}
+
+async function clarkSend(){
+  const input=$('cin'),text=input.value.trim();if(!text)return;
+  appendC('user',text);clarkHistory.push({role:'user',content:text});input.value='';
+  const btn=$('csend');btn.disabled=true;const tid=appendTyp();
+  const filtered=byPeriod(txs);
+  const inT=filtered.filter(t=>t.type==='entrata').reduce((s,t)=>s+t.amount,0);
+  const outT=filtered.filter(t=>t.type==='uscita').reduce((s,t)=>s+t.amount,0);
+  const byCat={};filtered.filter(t=>t.type==='uscita').forEach(t=>{byCat[t.cat]=(byCat[t.cat]||0)+t.amount;});
+  const catStr=Object.entries(byCat).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`${k}:€${v.toFixed(0)}`).join(', ');
+  const recent=txs.slice(0,20).map(t=>`${t.date}|${t.type==='entrata'?'+':'-'}€${t.amount.toFixed(2)}|${t.desc}|${t.cat}`).join('\n');
+  const dayOfMonth=new Date().getDate(),daysLeft=new Date(new Date().getFullYear(),new Date().getMonth()+1,0).getDate()-dayOfMonth;
+  const sys=`Sei Clark, agente finanziario personale di ${userName||'questo utente'}. Italiano, preciso, diretto e autorevole. Non sei un semplice chatbot — sei IL riferimento finanziario di questa persona. Dai consigli specifici basati sui dati reali.
+
+DATI FINANZIARI (periodo: ${period}):
+• Entrate: €${inT.toFixed(2)} | Uscite: €${outT.toFixed(2)} | Saldo: €${(inT-outT).toFixed(2)}
+• Budget mensile: €${monthlyBudget} | Giorno ${dayOfMonth} del mese | ${daysLeft} giorni al mese prossimo
+• Top uscite: ${catStr||'nessuna'}
+• Obiettivo utente: ${userGoal||'non specificato'}
+
+ULTIME 20 TRANSAZIONI:
+${recent||'Nessuna transazione.'}
+
+AVVISI ATTIVI: ${alerts.map(a=>a.text.replace(/<[^>]+>/g,'')).join(' | ')||'nessuno'}
+
+Rispondi in modo concreto, numerico dove possibile. Usa emoji con parsimonia. Massimo 3-4 frasi a meno che non sia richiesta un'analisi completa.`;
+  try{
+    const res=await fetch('https://ob-proxy.onrender.com/ai',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1000,system:sys,messages:clarkHistory.slice(-14)})});
+    const d=await res.json();const reply=d.content && d.content.map(c=>c.text||'').join('')||'Errore.';
+    removeTyp(tid);appendC('ai',reply);clarkHistory.push({role:'assistant',content:reply});
+  }catch{removeTyp(tid);appendC('ai','Errore di connessione. Riprova.');}
+  btn.disabled=false;
+}
+
+function appendC(role,text){const msgs=$('chat-msgs');const d=document.createElement('div');d.className=`cmsg ${role}`;d.innerHTML=`<div class="cav">${role==='user'?'👤':'💚'}</div><div class="cbubble">${text.replace(/</g,'&lt;')}</div>`;msgs.appendChild(d);msgs.scrollTop=msgs.scrollHeight;}
+function appendTyp(){const msgs=$('chat-msgs');const d=document.createElement('div');const id='t'+Date.now();d.id=id;d.className='cmsg ai';d.innerHTML='<div class="cav">💚</div><div class="cbubble"><div class="td"><span></span><span></span><span></span></div></div>';msgs.appendChild(d);msgs.scrollTop=msgs.scrollHeight;return id;}
+function removeTyp(id){var el=$(id);if(el)el.remove();}
+
+// KEYBOARD
+document.addEventListener('keydown',e=>{
+  if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||e.target.tagName==='SELECT')return;
+  if(e.key==='e'||e.key==='E'){setType('entrata');$('f-desc').focus();}
+  if(e.key==='u'||e.key==='U'){setType('uscita');$('f-desc').focus();}
+  if(e.key==='/'){e.preventDefault();$('search').focus();}
+  if(e.key==='Escape'){closeModal();$('score-modal').classList.remove('open');if(chatOpen)toggleChat();}
+});
+
+// RESIZE
+window.addEventListener('resize',()=>{if(txs.length)drawTrend();});
+</script>
+</body>
+</html>
